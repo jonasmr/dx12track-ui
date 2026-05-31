@@ -117,7 +117,15 @@ void BuildDefaultLayout(ImGuiID root, const ImVec2& size) {
     ImGuiID left_bottom;
     ImGuiID left_top = ImGui::DockBuilderSplitNode(left, ImGuiDir_Up, 0.55f, nullptr, &left_bottom);
     ImGuiID right_bottom;
-    ImGuiID right_top = ImGui::DockBuilderSplitNode(right, ImGuiDir_Up, 0.30f, nullptr, &right_bottom);
+    // dx12track (top of the right column) gets the larger share so the resolved
+    // callstack has room for ~15+ frames.
+    ImGuiID right_top = ImGui::DockBuilderSplitNode(right, ImGuiDir_Up, 0.58f, nullptr, &right_bottom);
+
+    // Mark the left area as the central node: on window resize (e.g. maximize)
+    // the right column keeps its width (from SizeRef) and the graph/allocations
+    // area absorbs the extra space. The splitter stays user-draggable.
+    if (ImGuiDockNode* n = ImGui::DockBuilderGetNode(left_bottom))
+        n->SetLocalFlags(n->LocalFlags | ImGuiDockNodeFlags_CentralNode);
 
     ImGui::DockBuilderDockWindow("Memory over time",   left_top);
     ImGui::DockBuilderDockWindow("Active allocations", left_bottom);
