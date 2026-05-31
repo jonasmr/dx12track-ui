@@ -127,6 +127,12 @@ void App::DrawTimeline() {
     if (!can_split && ImGui::IsItemHovered())
         ImGui::SetTooltip("Allocation-kind series can't be split by heap type");
 
+    // Escape clears the selected range.
+    if ((range_valid_ || dragging_range_) && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+        range_valid_ = false;
+        dragging_range_ = false;
+    }
+
     const auto& samples = trace_.samples();
     if (samples.empty()) {
         ImGui::TextUnformatted("No memory events in this trace.");
@@ -283,13 +289,16 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
     }
 
     // Selected-time cursor: draggable / click-to-place, but not while Shift is
-    // held (Shift+left is reserved for range selection).
-    double sx = SelectedSeconds();
-    bool moved = ImPlot::DragLineX(1, &sx, ImVec4(1, 1, 0, 1), 2.0f);
-    if (!shift) {
-        if (moved) SetSelected(sec_to_ns(sx));
-        if (hovered && !dragging_range_ && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
-            SetSelected(sec_to_ns(mouse_x));
+    // held (Shift+left is reserved for range selection). Hidden entirely while
+    // a range is selected, since the views then key off the range instead.
+    if (!range_valid_) {
+        double sx = SelectedSeconds();
+        bool moved = ImPlot::DragLineX(1, &sx, ImVec4(1, 1, 0, 1), 2.0f);
+        if (!shift) {
+            if (moved) SetSelected(sec_to_ns(sx));
+            if (hovered && !dragging_range_ && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+                SetSelected(sec_to_ns(mouse_x));
+        }
     }
     ImPlot::EndPlot();
     imap.Pan = saved_pan;
