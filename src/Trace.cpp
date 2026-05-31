@@ -1,6 +1,7 @@
 #include "Trace.h"
 
 #include <algorithm>
+#include <cstdlib>
 #include <fstream>
 
 #include <nlohmann/json.hpp>
@@ -8,6 +9,13 @@
 namespace dx12track {
 
 using json = nlohmann::json;
+
+namespace {
+// Parse a "0x..." (or bare) hex string to a 64-bit value.
+uint64_t ParseHex(const std::string& s) {
+    return s.empty() ? 0 : std::strtoull(s.c_str(), nullptr, 16);
+}
+} // namespace
 
 int HeapBucket(std::string_view h) {
     if (h == "Default")   return 1;
@@ -51,7 +59,9 @@ void Trace::Clear() {
     objects_.clear();
     live_index_.clear();
     samples_.clear();
+    modules_.clear();
     pid = 0;
+    protocol = 0;
     exe.clear();
     qpc_freq = 0;
     start_ns = end_ns = 0;
@@ -143,6 +153,7 @@ void Trace::IngestLine(std::string_view line) {
 
     if (ev == "hello") {
         pid      = j.value("pid", 0u);
+        protocol = j.value("protocol", 0u);
         qpc_freq = j.value("qpc_freq", (uint64_t)0);
         exe      = j.value("exe", std::string());
         if (!have_start_) { start_ns = ts; have_start_ = true; }
@@ -153,6 +164,23 @@ void Trace::IngestLine(std::string_view line) {
         child_exited = true;
         exit_code    = j.value("exit_code", 0u);
         end_ns       = std::max(end_ns, ts);
+        return;
+    }
+    if (ev == "module_loaded") {       // protocol 2+: for symbol resolution
+        Module m;
+        m.base         = ParseHex(j.value("base", std::string()));
+        m.size         = j.value("size", (uint64_t)0);
+        m.pe_timestamp = j.value("timestamp", 0u);
+        m.pdb_age      = j.value("pdb_age", 0u);
+        m.pdb_guid     = j.value("pdb_guid", std::string());
+        m.name         = j.value("name", std::string());
+        m.pdb_name     = j.value("pdb_name", std::string());
+        modules_.push_back(std::move(m));
+        return;
+    }
+    if (ev == "module_unloaded") {
+        // Keep the record for offline resolution; base reuse is rare in a
+        // single trace and we want to resolve addresses captured earlier.
         return;
     }
 
@@ -173,6 +201,12 @@ void Trace::IngestLine(std::string_view line) {
         o.created_ns     = ts;
         o.heap_bucket    = HeapBucket(o.heap);
         o.alloc_bucket   = AllocBucket(o.alloc);
+
+        if (auto it = j.find("stack"); it != j.end() && it->is_array()) {
+            o.stack.reserve(it->size());
+            for (const auto& frame : *it)
+                if (frame.is_string()) o.stack.push_back(ParseHex(frame.get<std::string>()));
+        }
 
         size_t idx = objects_.size();
         objects_.push_back(std::move(o));
@@ -219,6 +253,12 @@ void Trace::IngestLine(std::string_view line) {
     for (int i = 0; i < kHeapBuckets;  ++i) s.by_heap[i]  = cur_by_heap_[i];
     for (int i = 0; i < kAllocBuckets; ++i) s.by_alloc[i] = cur_by_alloc_[i];
     samples_.push_back(s);
+}
+
+const Module* Trace::ModuleForAddress(uint64_t addr) const {
+    for (const Module& m : modules_)
+        if (m.Contains(addr)) return &m;
+    return nullptr;
 }
 
 MemorySummary Trace::SummaryAt(uint64_t t) const {

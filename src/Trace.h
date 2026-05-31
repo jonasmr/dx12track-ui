@@ -27,6 +27,19 @@ int AllocBucket(std::string_view alloc);
 const char* HeapBucketName(int bucket);
 const char* AllocBucketName(int bucket);
 
+// A module loaded in the traced process (protocol 2+), used to map a stack
+// return address back to a binary + PDB for symbol resolution.
+struct Module {
+    uint64_t    base         = 0;
+    uint64_t    size         = 0;
+    uint32_t    pe_timestamp = 0;
+    uint32_t    pdb_age      = 0;
+    std::string pdb_guid;   // e.g. "8c3d35b8-e4f6-4d6e-8f7a-fd384f00bdbb"
+    std::string name;       // module path (the .exe/.dll)
+    std::string pdb_name;   // PDB path or bare filename
+    bool Contains(uint64_t addr) const { return addr >= base && addr < base + size; }
+};
+
 struct Obj {
     uint64_t    id             = 0;
     std::string type;          // "Resource", "PipelineState", ...
@@ -41,6 +54,7 @@ struct Obj {
     uint64_t    destroyed_ns   = UINT64_MAX; // UINT64_MAX while still live
     int         heap_bucket    = 0;
     int         alloc_bucket   = 0;
+    std::vector<uint64_t> stack; // capture-time return addresses (optional)
 
     bool LiveAt(uint64_t t) const { return created_ns <= t && t < destroyed_ns; }
 };
@@ -74,6 +88,7 @@ public:
 
     // --- header info (from hello / goodbye) ---
     uint32_t    pid          = 0;
+    uint32_t    protocol     = 0;   // 1 = no callstacks, 2 = modules + stacks
     std::string exe;
     uint64_t    qpc_freq     = 0;
     uint64_t    start_ns     = 0;   // first timestamp seen (hello is 0)
@@ -84,6 +99,9 @@ public:
     // --- derived data ---
     const std::vector<Obj>&    objects() const { return objects_; }
     const std::vector<Sample>& samples() const { return samples_; }
+    const std::vector<Module>& modules() const { return modules_; }
+    // Module whose address range contains `addr`, or nullptr.
+    const Module* ModuleForAddress(uint64_t addr) const;
     uint64_t    peak_ts_ns()  const { return peak_ts_ns_; }
     uint64_t    peak_bytes()  const { return peak_bytes_; }
     const std::string& path() const { return path_; }
@@ -101,6 +119,7 @@ private:
     std::vector<Obj>    objects_;
     std::unordered_map<uint64_t, size_t> live_index_; // id -> index while live
     std::vector<Sample> samples_;
+    std::vector<Module> modules_;
 
     // running aggregates while ingesting, used to build samples_
     uint64_t cur_total_ = 0;
