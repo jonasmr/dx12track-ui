@@ -150,13 +150,6 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
     if (!ImPlot::BeginPlot(plot_id, ImVec2(-1, height)))
         return;
 
-    ImPlot::SetupAxes("time (s)", "memory",
-                      ImPlotAxisFlags_None, ImPlotAxisFlags_AutoFit);
-    ImPlot::SetupAxisFormat(ImAxis_Y1, ByteAxisFormatter);
-    if (heap_filter != 0) // keep the two split graphs panning/zooming together
-        ImPlot::SetupAxisLinks(ImAxis_X1, &xlink_min_, &xlink_max_);
-    ImPlot::SetupLegend(ImPlotLocation_NorthWest);
-
     // Upload (bucket 2) and Readback (bucket 3) are the host-visible heaps.
     auto in_filter = [heap_filter](int b) {
         const bool host = (b == 2 || b == 3);
@@ -164,6 +157,28 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
         if (heap_filter == 2) return host;  // host-visible
         return true;                        // all
     };
+
+    // Peak of whatever this panel will display, so we can leave headroom above
+    // it (AutoFit pins the max flush against the top edge, hiding the peak).
+    double ymax = 0.0;
+    for (size_t i = 0; i < N; ++i) {
+        uint64_t s = 0;
+        if (mode_ == PlotMode::ByAlloc) {
+            for (int b = 1; b < kAllocBuckets; ++b) s += samples[i].by_alloc[b];
+        } else {
+            for (int b = 0; b < kHeapBuckets; ++b)
+                if (in_filter(b)) s += samples[i].by_heap[b];
+        }
+        if ((double)s > ymax) ymax = (double)s;
+    }
+
+    ImPlot::SetupAxes("time (s)", "memory", ImPlotAxisFlags_None, ImPlotAxisFlags_None);
+    ImPlot::SetupAxisFormat(ImAxis_Y1, ByteAxisFormatter);
+    ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, ymax > 0.0 ? ymax * 1.03 : 1.0,
+                            ImPlotCond_Always);
+    if (heap_filter != 0) // keep the two split graphs panning/zooming together
+        ImPlot::SetupAxisLinks(ImAxis_X1, &xlink_min_, &xlink_max_);
+    ImPlot::SetupLegend(ImPlotLocation_NorthWest);
 
     if (mode_ == PlotMode::ByHeap || mode_ == PlotMode::ByAlloc) {
         const bool by_heap = (mode_ == PlotMode::ByHeap);
