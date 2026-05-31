@@ -46,7 +46,7 @@ private:
     PlotMode     mode_        = PlotMode::Total;
     bool         live_tail_   = false;
     bool         show_counts_ = false;
-    bool         split_host_  = false; // Upload/Readback in a second graph
+    bool         split_host_  = true; // Upload/Readback in a second graph
 
     // Shared X-axis range so the split graphs pan/zoom together.
     double       xlink_min_   = 0.0;

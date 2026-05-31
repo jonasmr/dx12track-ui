@@ -101,6 +101,7 @@ void App::DrawTimeline() {
     if (ImGui::Button("Jump to peak")) SetSelected(trace_.peak_ts_ns());
     ImGui::SameLine();
     if (ImGui::Button("Jump to end")) SetSelected(trace_.end_ns);
+    ImGui::SameLine();
 
     // Splitting is a heap-type partition, so it only applies to the heap-based
     // views (Total / By heap), not the allocation-kind breakdown.
