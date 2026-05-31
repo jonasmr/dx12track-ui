@@ -137,7 +137,8 @@ void BuildDefaultLayout(ImGuiID root, const ImVec2& size) {
 } // namespace
 
 int WINAPI WinMain(HINSTANCE inst, HINSTANCE, LPSTR, int) {
-    const char* path = (__argc > 1) ? __argv[1] : "dx12track.jsonl";
+    // No arg: let App pick the last opened file, then the default name.
+    std::string path = (__argc > 1) ? __argv[1] : std::string();
 
     WNDCLASSEXW wc = { sizeof(wc), CS_CLASSDC, WndProc, 0, 0, inst, nullptr, nullptr,
                        nullptr, nullptr, L"dx12track_ui", nullptr };

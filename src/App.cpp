@@ -4,7 +4,10 @@
 #include <cctype>
 #include <cmath>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
+#include <filesystem>
+#include <fstream>
 
 #include <windows.h>
 #include <commdlg.h> // GetOpenFileNameW
@@ -28,6 +31,29 @@ std::string ToLower(std::string_view s) {
     std::string r(s);
     for (char& c : r) c = (char)std::tolower((unsigned char)c);
     return r;
+}
+
+// Path of the tiny settings file that remembers the last opened trace.
+std::string LastFileRecordPath() {
+    std::error_code ec;
+    if (const char* base = std::getenv("LOCALAPPDATA"); base && *base) {
+        std::filesystem::path dir = std::filesystem::path(base) / "dx12track-ui";
+        std::filesystem::create_directories(dir, ec);
+        return (dir / "last_file.txt").string();
+    }
+    return "dx12track-ui_last.txt"; // fallback: current directory
+}
+
+std::string ReadLastFile() {
+    std::ifstream f(LastFileRecordPath());
+    std::string line;
+    if (f) std::getline(f, line);
+    return line;
+}
+
+void WriteLastFile(const std::string& path) {
+    std::ofstream f(LastFileRecordPath(), std::ios::trunc);
+    if (f) f << path;
 }
 
 std::string Utf8(const wchar_t* w) {
@@ -58,8 +84,17 @@ bool BrowseForFile(std::string& out) {
 } // namespace
 
 App::App(std::string jsonl_path) {
-    loaded_ = trace_.Load(jsonl_path);
-    need_prompt_ = !loaded_; // no file at the default path -> ask on first frame
+    // Startup file resolution: an explicit command-line path wins; otherwise
+    // try the last opened file, then fall back to the default name.
+    if (!jsonl_path.empty()) {
+        loaded_ = trace_.Load(jsonl_path);
+    } else {
+        std::string last = ReadLastFile();
+        loaded_ = !last.empty() && trace_.Load(last);
+        if (!loaded_) loaded_ = trace_.Load("dx12track.jsonl");
+    }
+    need_prompt_ = !loaded_; // nothing loaded -> ask for a file on first frame
+    if (loaded_) WriteLastFile(trace_.path());
 
     // Seed the column filters with the full set of values dx12track can emit,
     // so the dropdowns list every option even if the trace doesn't use them.
@@ -99,6 +134,7 @@ void App::ResetAfterLoad() {
 
 void App::LoadFile(const std::string& path) {
     loaded_ = trace_.Load(path); // bumps trace generation -> Draw resets the view
+    if (loaded_) WriteLastFile(trace_.path()); // remember for next launch
 }
 
 void App::Draw() {
