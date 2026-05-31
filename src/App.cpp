@@ -330,9 +330,11 @@ void App::FilterCombo(const char* label, std::map<std::string, bool>& sel) {
     ImGui::SetNextItemWidth(96);
     if (ImGui::BeginCombo(label, preview)) {
         ImGui::PushID(label);
-        if (ImGui::SmallButton("All"))  for (auto& [k, v] : sel) v = true;
+        // "##" suffixes keep the visible text but give these buttons IDs
+        // distinct from any value checkbox (e.g. a "None" alloc/heap value).
+        if (ImGui::SmallButton("All##selectAll"))   for (auto& [k, v] : sel) v = true;
         ImGui::SameLine();
-        if (ImGui::SmallButton("None")) for (auto& [k, v] : sel) v = false;
+        if (ImGui::SmallButton("None##selectNone")) for (auto& [k, v] : sel) v = false;
         ImGui::Separator();
         for (auto& [k, v] : sel) {
             bool b = v;
