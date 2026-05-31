@@ -47,6 +47,7 @@ void App::Draw() {
         // Default the cursor to peak memory — the sample log is a clean
         // shutdown (everything freed at the end), so the end is uninteresting.
         SetSelected(trace_.peak_ts_ns() ? trace_.peak_ts_ns() : trace_.end_ns);
+        xlink_valid_ = false; // recompute the shared X range for the new data
         first_frame_ = false;
     }
 
@@ -101,6 +102,15 @@ void App::DrawTimeline() {
     ImGui::SameLine();
     if (ImGui::Button("Jump to end")) SetSelected(trace_.end_ns);
 
+    // Splitting is a heap-type partition, so it only applies to the heap-based
+    // views (Total / By heap), not the allocation-kind breakdown.
+    const bool can_split = (mode_ != PlotMode::ByAlloc);
+    ImGui::BeginDisabled(!can_split);
+    ImGui::Checkbox("Separate Upload/Readback graph", &split_host_);
+    ImGui::EndDisabled();
+    if (!can_split && ImGui::IsItemHovered())
+        ImGui::SetTooltip("Allocation-kind series can't be split by heap type");
+
     const auto& samples = trace_.samples();
     if (samples.empty()) {
         ImGui::TextUnformatted("No memory events in this trace.");
@@ -113,56 +123,96 @@ void App::DrawTimeline() {
     for (size_t i = 0; i < N; ++i)
         xs_[i] = NsToSeconds(samples[i].ts_ns, trace_.start_ns);
 
-    if (ImPlot::BeginPlot("##mem", ImVec2(-1, -1))) {
-        ImPlot::SetupAxes("time (s)", "memory",
-                          ImPlotAxisFlags_None, ImPlotAxisFlags_AutoFit);
-        ImPlot::SetupAxisFormat(ImAxis_Y1, ByteAxisFormatter);
-        ImPlot::SetupLegend(ImPlotLocation_NorthWest);
+    if (!xlink_valid_) {
+        xlink_min_ = 0.0;
+        xlink_max_ = (N && xs_[N - 1] > 0.0) ? xs_[N - 1] : 1.0;
+        xlink_valid_ = true;
+    }
 
-        if (mode_ == PlotMode::Total) {
-            ys_.resize(N);
-            for (size_t i = 0; i < N; ++i) ys_[i] = (double)samples[i].total_bytes;
-            ImPlotSpec fill;
-            fill.FillAlpha = 0.25f;
-            ImPlot::PlotShaded("Total", xs_.data(), ys_.data(), (int)N, 0.0, fill);
-            ImPlot::PlotStairs("Total", xs_.data(), ys_.data(), (int)N);
-        } else {
-            std::vector<double> baseline(N, 0.0);
-            const int first = 1;
-            const int last  = (mode_ == PlotMode::ByHeap) ? kHeapBuckets : kAllocBuckets;
-            ImPlotSpec fill;
-            fill.FillAlpha = 0.65f;
-            for (int b = first; b < last; ++b) {
-                lo_.resize(N);
-                hi_.resize(N);
-                bool any = false;
-                for (size_t i = 0; i < N; ++i) {
-                    uint64_t v = (mode_ == PlotMode::ByHeap) ? samples[i].by_heap[b]
-                                                             : samples[i].by_alloc[b];
-                    lo_[i] = baseline[i];
-                    hi_[i] = baseline[i] + (double)v;
-                    baseline[i] = hi_[i];
-                    if (v) any = true;
-                }
-                if (!any) continue; // don't clutter the legend with empty bands
-                const char* name = (mode_ == PlotMode::ByHeap) ? HeapBucketName(b)
-                                                               : AllocBucketName(b);
-                ImPlot::PlotShaded(name, xs_.data(), lo_.data(), hi_.data(), (int)N, fill);
-            }
+    if (split_host_ && can_split) {
+        if (ImPlot::BeginAlignedPlots("mem_aligned")) {
+            const float h = (ImGui::GetContentRegionAvail().y - 4.0f) * 0.5f;
+            DrawTimelinePanel("Device-local (Default)##dev", h, 1);
+            DrawTimelinePanel("Host-visible (Upload/Readback)##host", h, 2);
+            ImPlot::EndAlignedPlots();
         }
-
-        // Selected-time cursor: draggable, and click-to-place anywhere.
-        double sx = SelectedSeconds();
-        if (ImPlot::DragLineX(1, &sx, ImVec4(1, 1, 0, 1), 2.0f))
-            SetSelected(trace_.start_ns + (uint64_t)(sx < 0 ? 0 : sx * 1e9));
-        if (ImPlot::IsPlotHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-            double mx = ImPlot::GetPlotMousePos().x;
-            SetSelected(trace_.start_ns + (uint64_t)(mx < 0 ? 0 : mx * 1e9));
-        }
-        ImPlot::EndPlot();
+    } else {
+        DrawTimelinePanel("##mem", -1.0f, 0);
     }
 
     ImGui::End();
+}
+
+void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) {
+    const auto& samples = trace_.samples();
+    const size_t N = samples.size();
+
+    if (!ImPlot::BeginPlot(plot_id, ImVec2(-1, height)))
+        return;
+
+    ImPlot::SetupAxes("time (s)", "memory",
+                      ImPlotAxisFlags_None, ImPlotAxisFlags_AutoFit);
+    ImPlot::SetupAxisFormat(ImAxis_Y1, ByteAxisFormatter);
+    if (heap_filter != 0) // keep the two split graphs panning/zooming together
+        ImPlot::SetupAxisLinks(ImAxis_X1, &xlink_min_, &xlink_max_);
+    ImPlot::SetupLegend(ImPlotLocation_NorthWest);
+
+    // Upload (bucket 2) and Readback (bucket 3) are the host-visible heaps.
+    auto in_filter = [heap_filter](int b) {
+        const bool host = (b == 2 || b == 3);
+        if (heap_filter == 1) return !host; // device-local
+        if (heap_filter == 2) return host;  // host-visible
+        return true;                        // all
+    };
+
+    if (mode_ == PlotMode::ByHeap || mode_ == PlotMode::ByAlloc) {
+        const bool by_heap = (mode_ == PlotMode::ByHeap);
+        const int  last    = by_heap ? kHeapBuckets : kAllocBuckets;
+        std::vector<double> baseline(N, 0.0);
+        ImPlotSpec fill;
+        fill.FillAlpha = 0.65f;
+        for (int b = 1; b < last; ++b) {
+            if (by_heap && !in_filter(b)) continue;
+            lo_.resize(N);
+            hi_.resize(N);
+            bool any = false;
+            for (size_t i = 0; i < N; ++i) {
+                uint64_t v = by_heap ? samples[i].by_heap[b] : samples[i].by_alloc[b];
+                lo_[i] = baseline[i];
+                hi_[i] = baseline[i] + (double)v;
+                baseline[i] = hi_[i];
+                if (v) any = true;
+            }
+            if (!any) continue; // don't clutter the legend with empty bands
+            const char* name = by_heap ? HeapBucketName(b) : AllocBucketName(b);
+            ImPlot::PlotShaded(name, xs_.data(), lo_.data(), hi_.data(), (int)N, fill);
+        }
+    } else { // Total of the selected heap subset
+        ys_.resize(N);
+        for (size_t i = 0; i < N; ++i) {
+            uint64_t s = 0;
+            for (int b = 0; b < kHeapBuckets; ++b)
+                if (in_filter(b)) s += samples[i].by_heap[b];
+            ys_[i] = (double)s;
+        }
+        const char* lbl = (heap_filter == 1) ? "Device-local"
+                        : (heap_filter == 2) ? "Upload+Readback"
+                                             : "Total";
+        ImPlotSpec fill;
+        fill.FillAlpha = 0.25f;
+        ImPlot::PlotShaded(lbl, xs_.data(), ys_.data(), (int)N, 0.0, fill);
+        ImPlot::PlotStairs(lbl, xs_.data(), ys_.data(), (int)N);
+    }
+
+    // Selected-time cursor: draggable, and click-to-place anywhere.
+    double sx = SelectedSeconds();
+    if (ImPlot::DragLineX(1, &sx, ImVec4(1, 1, 0, 1), 2.0f))
+        SetSelected(trace_.start_ns + (uint64_t)(sx < 0 ? 0 : sx * 1e9));
+    if (ImPlot::IsPlotHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+        double mx = ImPlot::GetPlotMousePos().x;
+        SetSelected(trace_.start_ns + (uint64_t)(mx < 0 ? 0 : mx * 1e9));
+    }
+    ImPlot::EndPlot();
 }
 
 void App::DrawSummary() {
