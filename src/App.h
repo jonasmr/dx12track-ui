@@ -5,6 +5,7 @@
 // the active-allocations list always describe the same instant.
 //
 #include <cstdint>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -38,6 +39,9 @@ private:
     void SetSelected(uint64_t ts);
     double SelectedSeconds() const;
 
+    // Multi-select dropdown over the distinct values in `sel` (value -> shown).
+    void FilterCombo(const char* label, std::map<std::string, bool>& sel);
+
     enum class PlotMode { Total, ByHeap, ByAlloc };
 
     Trace        trace_;
@@ -55,6 +59,10 @@ private:
 
     char         filter_[128] = {};
     bool         first_frame_ = true;
+
+    // Per-column value filters for the allocations table (value -> shown).
+    // Populated lazily from the data; new values default to shown.
+    std::map<std::string, bool> alloc_show_, heap_show_, dim_show_;
 
     // Scratch buffers reused across frames for ImPlot (avoids per-frame alloc).
     std::vector<double> xs_, ys_, lo_, hi_;

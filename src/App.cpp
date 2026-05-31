@@ -317,27 +317,71 @@ void App::DrawSummary() {
     ImGui::End();
 }
 
+void App::FilterCombo(const char* label, std::map<std::string, bool>& sel) {
+    int on = 0;
+    for (auto& [k, v] : sel) if (v) ++on;
+    const int total = (int)sel.size();
+
+    char preview[24];
+    if (on == total)   std::snprintf(preview, sizeof preview, "All");
+    else if (on == 0)  std::snprintf(preview, sizeof preview, "None");
+    else               std::snprintf(preview, sizeof preview, "%d/%d", on, total);
+
+    ImGui::SetNextItemWidth(96);
+    if (ImGui::BeginCombo(label, preview)) {
+        ImGui::PushID(label);
+        if (ImGui::SmallButton("All"))  for (auto& [k, v] : sel) v = true;
+        ImGui::SameLine();
+        if (ImGui::SmallButton("None")) for (auto& [k, v] : sel) v = false;
+        ImGui::Separator();
+        for (auto& [k, v] : sel) {
+            bool b = v;
+            if (ImGui::Checkbox(k.empty() ? "(empty)" : k.c_str(), &b)) v = b;
+        }
+        ImGui::PopID();
+        ImGui::EndCombo();
+    }
+}
+
 void App::DrawAllocations() {
     ImGui::Begin("Active allocations");
 
-    ImGui::SetNextItemWidth(220);
+    const auto& objs = trace_.objects();
+
+    // Discover distinct column values; new ones default to shown.
+    for (const Obj& o : objs) {
+        alloc_show_.try_emplace(o.alloc, true);
+        heap_show_.try_emplace(o.heap, true);
+        dim_show_.try_emplace(o.dim, true);
+    }
+
+    ImGui::SetNextItemWidth(200);
     ImGui::InputTextWithHint("##filter", "filter by name / type", filter_, sizeof filter_);
     ImGui::SameLine();
+    FilterCombo("Alloc", alloc_show_);
+    ImGui::SameLine();
+    FilterCombo("Heap", heap_show_);
+    ImGui::SameLine();
+    FilterCombo("Dim", dim_show_);
 
-    // Collect indices of objects live at the selected time, honoring the filter.
+    // Collect indices of objects live at the selected time, honoring every
+    // filter, and total their size for the summary line.
     std::string flt = ToLower(filter_);
     std::vector<size_t> rows;
-    rows.reserve(trace_.objects().size());
-    const auto& objs = trace_.objects();
+    rows.reserve(objs.size());
+    uint64_t total_size = 0;
     for (size_t i = 0; i < objs.size(); ++i) {
-        if (!objs[i].LiveAt(selected_ts_)) continue;
+        const Obj& o = objs[i];
+        if (!o.LiveAt(selected_ts_)) continue;
+        if (!alloc_show_[o.alloc] || !heap_show_[o.heap] || !dim_show_[o.dim]) continue;
         if (!flt.empty()) {
-            std::string hay = ToLower(objs[i].name) + " " + ToLower(objs[i].type);
+            std::string hay = ToLower(o.name) + " " + ToLower(o.type);
             if (hay.find(flt) == std::string::npos) continue;
         }
         rows.push_back(i);
+        total_size += o.size;
     }
-    ImGui::Text("%zu live", rows.size());
+    ImGui::Text("%zu live   %s", rows.size(), FormatBytes(total_size).c_str());
 
     const ImGuiTableFlags tflags =
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
