@@ -92,14 +92,47 @@ void App::DrawMenuBar() {
         ImGui::TextColored(ImVec4(1, 0.7f, 0.2f, 1), "child exited (code %u)",
                            trace_.exit_code);
 
+    ImGui::Text("modules : %zu", trace_.modules().size());
+
     ImGui::Separator();
     ImGui::TextWrapped("file: %s", trace_.path().c_str());
     if (ImGui::Button("Reload")) {
         loaded_ = trace_.Reload();
+        resolver_.Clear();
+        picked_id_ = 0;
+        picked_frames_.clear();
         first_frame_ = true; // re-snap cursor to peak
     }
     ImGui::SameLine();
     ImGui::Checkbox("Live tail", &live_tail_);
+
+    // --- callstack of the clicked allocation (resolved on demand) ---
+    ImGui::SeparatorText("Callstack");
+    if (picked_id_ == 0) {
+        ImGui::TextDisabled("Click an allocation to resolve its callstack.");
+    } else {
+        ImGui::TextUnformatted(picked_label_.c_str());
+        if (!picked_has_stack_) {
+            ImGui::TextDisabled("(no callstack captured for this allocation)");
+        } else if (picked_frames_.empty()) {
+            ImGui::TextDisabled("(empty)");
+        } else {
+            ImGui::BeginChild("stack", ImVec2(0, 0), ImGuiChildFlags_Borders);
+            for (size_t i = 0; i < picked_frames_.size(); ++i) {
+                const ResolvedFrame& f = picked_frames_[i];
+                ImGui::TextDisabled("%2zu", i);
+                ImGui::SameLine();
+                if (f.resolved)
+                    ImGui::TextUnformatted(f.symbol.c_str());
+                else
+                    ImGui::TextColored(ImVec4(0.7f, 0.7f, 0.7f, 1), "%s", f.symbol.c_str());
+                if (!f.module.empty() && ImGui::IsItemHovered())
+                    ImGui::SetTooltip("%s  (0x%llx)", f.module.c_str(),
+                                      (unsigned long long)f.address);
+            }
+            ImGui::EndChild();
+        }
+    }
 
     ImGui::End();
 }
@@ -560,7 +593,18 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
             for (int r = clipper.DisplayStart; r < clipper.DisplayEnd; ++r) {
                 const Obj& o = objs[rows[r]];
                 ImGui::TableNextRow();
-                ImGui::TableNextColumn(); ImGui::Text("%llu", (unsigned long long)o.id);
+                ImGui::TableNextColumn();
+                // Whole-row selectable: clicking resolves this object's stack.
+                char idbuf[32];
+                std::snprintf(idbuf, sizeof idbuf, "%llu", (unsigned long long)o.id);
+                if (ImGui::Selectable(idbuf, picked_id_ == o.id,
+                                      ImGuiSelectableFlags_SpanAllColumns)) {
+                    picked_id_ = o.id;
+                    picked_label_ = std::string(idbuf) + "  " +
+                                    (o.name.empty() ? o.type : o.name);
+                    picked_has_stack_ = !o.stack.empty();
+                    picked_frames_ = resolver_.Resolve(o.stack, trace_);
+                }
                 ImGui::TableNextColumn(); ImGui::TextUnformatted(o.type.c_str());
                 ImGui::TableNextColumn(); ImGui::TextUnformatted(o.alloc.c_str());
                 ImGui::TableNextColumn(); ImGui::TextUnformatted(o.heap.c_str());

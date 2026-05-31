@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "Trace.h"
+#include "SymbolResolver.h"
 
 namespace dx12track {
 
@@ -63,6 +64,13 @@ private:
     double       xlink_min_   = 0.0;
     double       xlink_max_   = 0.0;
     bool         xlink_valid_ = false;
+
+    // On-demand callstack resolution for the clicked allocation.
+    SymbolResolver            resolver_;
+    uint64_t                  picked_id_   = 0;     // 0 = none picked
+    std::string               picked_label_;        // "id 12  Texture"
+    bool                      picked_has_stack_ = false;
+    std::vector<ResolvedFrame> picked_frames_;
 
     // Shift-drag time-range selection on the timeline (for leak hunting).
     bool         range_valid_     = false;

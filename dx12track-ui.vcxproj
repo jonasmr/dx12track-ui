@@ -44,12 +44,13 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)src\third_party\raw_pdb\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NOMINMAX;WIN32_LEAN_AND_MEAN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>d3d11.lib;dxgi.lib;d3dcompiler.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -74,11 +75,36 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\App.cpp" />
     <ClCompile Include="src\Trace.cpp" />
+    <ClCompile Include="src\SymbolResolver.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h" />
     <ClInclude Include="src\Trace.h" />
     <ClInclude Include="src\Format.h" />
+    <ClInclude Include="src\SymbolResolver.h" />
+  </ItemGroup>
+  <!-- raw_pdb (MolecularMatters): third-party, compiled with warnings/SDL relaxed. -->
+  <ItemGroup>
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_CoalescedMSFStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_DBIStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_DBITypes.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_DirectMSFStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_GlobalSymbolStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_IPIStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_ImageSectionStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_InfoStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_ModuleInfoStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_ModuleLineStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_ModuleSymbolStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_NamesStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_PCH.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_PublicSymbolStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_RawFile.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_SectionContributionStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_SourceFileStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_TPIStream.cpp" />
+    <ClCompile Include="src\third_party\raw_pdb\src\PDB_Types.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
 </Project>

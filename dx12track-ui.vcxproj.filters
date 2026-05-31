@@ -12,10 +12,12 @@
     <ClCompile Include="src\main.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="src\App.cpp"><Filter>Source Files</Filter></ClCompile>
     <ClCompile Include="src\Trace.cpp"><Filter>Source Files</Filter></ClCompile>
+    <ClCompile Include="src\SymbolResolver.cpp"><Filter>Source Files</Filter></ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\App.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="src\Trace.h"><Filter>Header Files</Filter></ClInclude>
     <ClInclude Include="src\Format.h"><Filter>Header Files</Filter></ClInclude>
+    <ClInclude Include="src\SymbolResolver.h"><Filter>Header Files</Filter></ClInclude>
   </ItemGroup>
 </Project>
