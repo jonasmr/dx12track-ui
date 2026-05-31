@@ -59,6 +59,7 @@ private:
     Trace        trace_;
     bool         loaded_      = false;
     bool         need_prompt_ = false; // default file missing -> ask on first frame
+    uint32_t     seen_generation_ = 0; // detect trace resets (incl. tail restart)
     uint64_t     selected_ts_ = 0;
     PlotMode     mode_        = PlotMode::Total;
     bool         live_tail_   = true;

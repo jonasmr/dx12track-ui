@@ -107,11 +107,16 @@ public:
     const std::string& path() const { return path_; }
     const std::string& error() const { return error_; }
 
+    // Bumped every time a fresh capture starts (initial load, reload, or a
+    // live-tail restart). The UI watches this to reset its per-trace state.
+    uint32_t generation() const { return generation_; }
+
     // State of the world at instant t (single pass over all objects).
     MemorySummary SummaryAt(uint64_t t) const;
 
 private:
     void Clear();
+    void ResetModelState(); // drop parsed model/header, keep file-read position
     void IngestLine(std::string_view line);
 
     std::string         path_;
@@ -129,6 +134,8 @@ private:
     uint64_t peak_ts_ns_ = 0;
     uint64_t peak_bytes_ = 0;
     bool     have_start_ = false;
+
+    uint32_t    generation_  = 0; // incremented on each fresh capture
 
     // live-tail state
     uint64_t    read_offset_ = 0; // bytes consumed from the file so far

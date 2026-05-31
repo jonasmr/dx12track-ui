@@ -98,8 +98,7 @@ void App::ResetAfterLoad() {
 }
 
 void App::LoadFile(const std::string& path) {
-    loaded_ = trace_.Load(path);
-    ResetAfterLoad();
+    loaded_ = trace_.Load(path); // bumps trace generation -> Draw resets the view
 }
 
 void App::Draw() {
@@ -109,6 +108,13 @@ void App::Draw() {
         need_prompt_ = false;
         std::string path;
         if (BrowseForFile(path)) LoadFile(path);
+    }
+
+    // A fresh capture (initial load, reload, or a live-tail restart) bumps the
+    // trace generation; reset per-trace UI state and re-snap to the new peak.
+    if (seen_generation_ != trace_.generation()) {
+        seen_generation_ = trace_.generation();
+        ResetAfterLoad();
     }
 
     if (first_frame_) {
@@ -150,8 +156,7 @@ void App::DrawMenuBar() {
     ImGui::Separator();
     ImGui::TextWrapped("file: %s", trace_.path().c_str());
     if (ImGui::Button("Reload")) {
-        loaded_ = trace_.Reload();
-        ResetAfterLoad();
+        loaded_ = trace_.Reload(); // generation bump -> Draw resets the view
     }
     ImGui::SameLine();
     if (ImGui::Button("Open...")) {

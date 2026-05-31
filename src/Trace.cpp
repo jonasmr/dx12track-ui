@@ -55,7 +55,7 @@ const char* AllocBucketName(int b) {
     }
 }
 
-void Trace::Clear() {
+void Trace::ResetModelState() {
     objects_.clear();
     live_index_.clear();
     samples_.clear();
@@ -72,6 +72,11 @@ void Trace::Clear() {
     for (auto& v : cur_by_alloc_) v = 0;
     peak_ts_ns_ = peak_bytes_ = 0;
     have_start_ = false;
+    ++generation_;
+}
+
+void Trace::Clear() {
+    ResetModelState();
     read_offset_ = 0;
     partial_.clear();
     error_.clear();
@@ -113,7 +118,13 @@ bool Trace::PollTail() {
     std::ifstream f(path_, std::ios::binary | std::ios::ate);
     if (!f) return false;
     uint64_t size = (uint64_t)f.tellg();
-    if (size <= read_offset_) return false; // nothing new (or truncated/rotated)
+    if (size < read_offset_) {
+        // The file shrank: the previous capture's file was truncated/replaced
+        // by a new run. Re-read from scratch (drops the old capture's state).
+        f.close();
+        return Reload();
+    }
+    if (size == read_offset_) return false; // nothing new
 
     f.seekg((std::streamoff)read_offset_, std::ios::beg);
     std::string chunk((std::istreambuf_iterator<char>(f)),
@@ -152,12 +163,16 @@ void Trace::IngestLine(std::string_view line) {
     const uint64_t ts = j.value("ts_ns", (uint64_t)0);
 
     if (ev == "hello") {
+        // A hello after we've already seen one means a new capture session
+        // began (e.g. the process restarted while tailing) — drop the old data.
+        if (have_start_) ResetModelState();
         pid      = j.value("pid", 0u);
         protocol = j.value("protocol", 0u);
         qpc_freq = j.value("qpc_freq", (uint64_t)0);
         exe      = j.value("exe", std::string());
-        if (!have_start_) { start_ns = ts; have_start_ = true; }
-        end_ns = std::max(end_ns, ts);
+        start_ns = ts;
+        end_ns   = ts;
+        have_start_ = true;
         return;
     }
     if (ev == "goodbye") {
