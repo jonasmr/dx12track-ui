@@ -61,8 +61,9 @@ private:
     bool         first_frame_ = true;
 
     // Per-column value filters for the allocations table (value -> shown).
-    // Populated lazily from the data; new values default to shown.
-    std::map<std::string, bool> alloc_show_, heap_show_, dim_show_;
+    // Seeded with the full set of values dx12track can emit (see EventTypes.h),
+    // and topped up from the data; everything defaults to shown.
+    std::map<std::string, bool> type_show_, alloc_show_, heap_show_, dim_show_;
 
     // Scratch buffers reused across frames for ImPlot (avoids per-frame alloc).
     std::vector<double> xs_, ys_, lo_, hi_;

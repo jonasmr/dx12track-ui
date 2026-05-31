@@ -31,6 +31,21 @@ std::string ToLower(std::string_view s) {
 
 App::App(std::string jsonl_path) {
     loaded_ = trace_.Load(jsonl_path);
+
+    // Seed the column filters with the full set of values dx12track can emit,
+    // so the dropdowns list every option even if the trace doesn't use them.
+    // Mirrors the *Name() tables in dx12track/src/common/EventTypes.h.
+    for (const char* v : {"Unknown", "Device", "Resource", "Heap", "DescriptorHeap",
+                          "CommandQueue", "CommandAllocator", "CommandList",
+                          "PipelineState", "RootSignature", "Fence", "QueryHeap",
+                          "CommandSignature"})
+        type_show_[v] = true;
+    for (const char* v : {"None", "Committed", "Placed", "Reserved", "Heap"})
+        alloc_show_[v] = true;
+    for (const char* v : {"None", "Default", "Upload", "Readback", "Custom", "GpuUpload"})
+        heap_show_[v] = true;
+    for (const char* v : {"Unknown", "Buffer", "Tex1D", "Tex2D", "Tex3D"})
+        dim_show_[v] = true;
 }
 
 double App::SelectedSeconds() const {
@@ -350,15 +365,18 @@ void App::DrawAllocations() {
 
     const auto& objs = trace_.objects();
 
-    // Discover distinct column values; new ones default to shown.
+    // Top up the seeded filters with any extra values seen in the data.
     for (const Obj& o : objs) {
+        type_show_.try_emplace(o.type, true);
         alloc_show_.try_emplace(o.alloc, true);
         heap_show_.try_emplace(o.heap, true);
         dim_show_.try_emplace(o.dim, true);
     }
 
-    ImGui::SetNextItemWidth(200);
-    ImGui::InputTextWithHint("##filter", "filter by name / type", filter_, sizeof filter_);
+    ImGui::SetNextItemWidth(160);
+    ImGui::InputTextWithHint("##filter", "filter by name", filter_, sizeof filter_);
+    ImGui::SameLine();
+    FilterCombo("Type", type_show_);
     ImGui::SameLine();
     FilterCombo("Alloc", alloc_show_);
     ImGui::SameLine();
@@ -375,11 +393,9 @@ void App::DrawAllocations() {
     for (size_t i = 0; i < objs.size(); ++i) {
         const Obj& o = objs[i];
         if (!o.LiveAt(selected_ts_)) continue;
-        if (!alloc_show_[o.alloc] || !heap_show_[o.heap] || !dim_show_[o.dim]) continue;
-        if (!flt.empty()) {
-            std::string hay = ToLower(o.name) + " " + ToLower(o.type);
-            if (hay.find(flt) == std::string::npos) continue;
-        }
+        if (!type_show_[o.type] || !alloc_show_[o.alloc] ||
+            !heap_show_[o.heap] || !dim_show_[o.dim]) continue;
+        if (!flt.empty() && ToLower(o.name).find(flt) == std::string::npos) continue;
         rows.push_back(i);
         total_size += o.size;
     }
