@@ -163,8 +163,17 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
     const auto& samples = trace_.samples();
     const size_t N = samples.size();
 
-    if (!ImPlot::BeginPlot(plot_id, ImVec2(-1, height)))
+    // While Shift is held, free up the left mouse button (normally pan) so we
+    // can use it for range selection; restore the mapping after EndPlot.
+    const bool shift = ImGui::GetIO().KeyShift;
+    ImPlotInputMap& imap = ImPlot::GetInputMap();
+    const int saved_pan = imap.Pan;
+    if (shift) imap.Pan = ImGuiMouseButton_Middle;
+
+    if (!ImPlot::BeginPlot(plot_id, ImVec2(-1, height))) {
+        imap.Pan = saved_pan;
         return;
+    }
 
     // Upload (bucket 2) and Readback (bucket 3) are the host-visible heaps.
     auto in_filter = [heap_filter](int b) {
@@ -235,15 +244,55 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
         ImPlot::PlotStairs(lbl, xs_.data(), ys_.data(), (int)N);
     }
 
-    // Selected-time cursor: draggable, and click-to-place anywhere.
+    const bool hovered = ImPlot::IsPlotHovered();
+    const double mouse_x = ImPlot::GetPlotMousePos().x;
+    auto sec_to_ns = [&](double s) {
+        return trace_.start_ns + (uint64_t)(s < 0 ? 0 : s * 1e9);
+    };
+
+    // Shift-drag selects a time range (used by the leak-hunting tabs).
+    if (shift && hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
+        dragging_range_  = true;
+        drag_anchor_sec_ = mouse_x;
+    }
+    if (dragging_range_) {
+        double a = drag_anchor_sec_, b = mouse_x;
+        if (a > b) std::swap(a, b);
+        range_start_ = sec_to_ns(a);
+        range_end_   = sec_to_ns(b);
+        range_valid_ = true;
+        if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+            dragging_range_ = false;
+            // A shift-click (no real drag) clears the selection instead.
+            if (range_end_ <= range_start_ + 1000) range_valid_ = false;
+        }
+    }
+
+    // Highlight the selected range.
+    if (range_valid_) {
+        const ImPlotRect lim = ImPlot::GetPlotLimits();
+        const ImVec2 p0 = ImPlot::PlotToPixels(
+            NsToSeconds(range_start_, trace_.start_ns), lim.Y.Max);
+        const ImVec2 p1 = ImPlot::PlotToPixels(
+            NsToSeconds(range_end_, trace_.start_ns), lim.Y.Min);
+        ImDrawList* dl = ImPlot::GetPlotDrawList();
+        ImPlot::PushPlotClipRect();
+        dl->AddRectFilled(p0, p1, IM_COL32(255, 215, 90, 38));
+        dl->AddRect(p0, p1, IM_COL32(255, 215, 90, 160));
+        ImPlot::PopPlotClipRect();
+    }
+
+    // Selected-time cursor: draggable / click-to-place, but not while Shift is
+    // held (Shift+left is reserved for range selection).
     double sx = SelectedSeconds();
-    if (ImPlot::DragLineX(1, &sx, ImVec4(1, 1, 0, 1), 2.0f))
-        SetSelected(trace_.start_ns + (uint64_t)(sx < 0 ? 0 : sx * 1e9));
-    if (ImPlot::IsPlotHovered() && ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-        double mx = ImPlot::GetPlotMousePos().x;
-        SetSelected(trace_.start_ns + (uint64_t)(mx < 0 ? 0 : mx * 1e9));
+    bool moved = ImPlot::DragLineX(1, &sx, ImVec4(1, 1, 0, 1), 2.0f);
+    if (!shift) {
+        if (moved) SetSelected(sec_to_ns(sx));
+        if (hovered && !dragging_range_ && ImGui::IsMouseClicked(ImGuiMouseButton_Left))
+            SetSelected(sec_to_ns(mouse_x));
     }
     ImPlot::EndPlot();
+    imap.Pan = saved_pan;
 }
 
 void App::DrawSummary() {
@@ -375,31 +424,81 @@ void App::DrawAllocations() {
 
     ImGui::SetNextItemWidth(160);
     ImGui::InputTextWithHint("##filter", "filter by name", filter_, sizeof filter_);
-    ImGui::SameLine();
-    FilterCombo("Type", type_show_);
-    ImGui::SameLine();
-    FilterCombo("Alloc", alloc_show_);
-    ImGui::SameLine();
-    FilterCombo("Heap", heap_show_);
-    ImGui::SameLine();
-    FilterCombo("Dim", dim_show_);
+    ImGui::SameLine(); FilterCombo("Type", type_show_);
+    ImGui::SameLine(); FilterCombo("Alloc", alloc_show_);
+    ImGui::SameLine(); FilterCombo("Heap", heap_show_);
+    ImGui::SameLine(); FilterCombo("Dim", dim_show_);
 
-    // Collect indices of objects live at the selected time, honoring every
-    // filter, and total their size for the summary line.
+    const uint64_t s0 = trace_.start_ns;
+    if (range_valid_) {
+        ImGui::TextDisabled("range  %s ... %s   (%s)",
+            FormatNs(range_start_ - s0).c_str(),
+            FormatNs(range_end_ - s0).c_str(),
+            FormatNs(range_end_ - range_start_).c_str());
+    } else {
+        ImGui::TextDisabled("Shift-drag the graph to select a time range");
+    }
+
+    const uint64_t rs = range_start_, re = range_end_;
+    const uint64_t active_t = range_valid_ ? re : selected_ts_;
+
+    if (ImGui::BeginTabBar("alloc_tabs")) {
+        // Always present: objects live at the cursor (or at the end of a range).
+        if (ImGui::BeginTabItem("Active Allocations")) {
+            DrawAllocTable("active", "live", active_t,
+                [active_t](const Obj& o) { return o.LiveAt(active_t); });
+            ImGui::EndTabItem();
+        }
+        if (range_valid_) {
+            // Created during the range and still alive at its end (leak suspects).
+            if (ImGui::BeginTabItem("Allocations")) {
+                DrawAllocTable("allocs", "allocated", re, [rs, re](const Obj& o) {
+                    return o.created_ns >= rs && o.created_ns <= re && o.destroyed_ns > re;
+                });
+                ImGui::EndTabItem();
+            }
+            // Alive at the start of the range, freed before its end.
+            if (ImGui::BeginTabItem("Frees")) {
+                DrawAllocTable("frees", "freed", re, [rs, re](const Obj& o) {
+                    return o.created_ns <= rs && o.destroyed_ns > rs && o.destroyed_ns <= re;
+                });
+                ImGui::EndTabItem();
+            }
+            // Both created and freed within the range (transient churn).
+            if (ImGui::BeginTabItem("Alloc&Free")) {
+                DrawAllocTable("allocfree", "alloc+freed", re, [rs, re](const Obj& o) {
+                    return o.created_ns >= rs && o.created_ns <= re &&
+                           o.destroyed_ns >= rs && o.destroyed_ns <= re;
+                });
+                ImGui::EndTabItem();
+            }
+        }
+        ImGui::EndTabBar();
+    }
+
+    ImGui::End();
+}
+
+void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
+                         const std::function<bool(const Obj&)>& include) {
+    const auto& objs = trace_.objects();
+
+    // Collect objects matching this tab's predicate and the shared filters,
+    // and total their size for the summary line.
     std::string flt = ToLower(filter_);
     std::vector<size_t> rows;
     rows.reserve(objs.size());
     uint64_t total_size = 0;
     for (size_t i = 0; i < objs.size(); ++i) {
         const Obj& o = objs[i];
-        if (!o.LiveAt(selected_ts_)) continue;
+        if (!include(o)) continue;
         if (!type_show_[o.type] || !alloc_show_[o.alloc] ||
             !heap_show_[o.heap] || !dim_show_[o.dim]) continue;
         if (!flt.empty() && ToLower(o.name).find(flt) == std::string::npos) continue;
         rows.push_back(i);
         total_size += o.size;
     }
-    ImGui::Text("%zu live   %s", rows.size(), FormatBytes(total_size).c_str());
+    ImGui::Text("%zu %s   %s", rows.size(), noun, FormatBytes(total_size).c_str());
 
     const ImGuiTableFlags tflags =
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
@@ -407,7 +506,7 @@ void App::DrawAllocations() {
 
     enum Col { C_Id, C_Type, C_Alloc, C_Heap, C_Dim, C_Format, C_Size, C_Age, C_Name };
 
-    if (ImGui::BeginTable("allocs", 9, tflags)) {
+    if (ImGui::BeginTable(id, 9, tflags)) {
         ImGui::TableSetupScrollFreeze(0, 1);
         ImGui::TableSetupColumn("id",     ImGuiTableColumnFlags_WidthFixed |
                                           ImGuiTableColumnFlags_DefaultSort, 0, C_Id);
@@ -462,15 +561,14 @@ void App::DrawAllocations() {
                 if (o.size) ImGui::TextUnformatted(FormatBytes(o.size).c_str());
                 else        ImGui::TextUnformatted("-");
                 ImGui::TableNextColumn();
-                ImGui::TextUnformatted(FormatNs(selected_ts_ - o.created_ns).c_str());
+                uint64_t age = ref_t >= o.created_ns ? ref_t - o.created_ns : 0;
+                ImGui::TextUnformatted(FormatNs(age).c_str());
                 ImGui::TableNextColumn();
                 ImGui::TextUnformatted(o.name.empty() ? "(unnamed)" : o.name.c_str());
             }
         }
         ImGui::EndTable();
     }
-
-    ImGui::End();
 }
 
 } // namespace dx12track

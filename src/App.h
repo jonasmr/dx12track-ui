@@ -5,6 +5,7 @@
 // the active-allocations list always describe the same instant.
 //
 #include <cstdint>
+#include <functional>
 #include <map>
 #include <string>
 #include <vector>
@@ -29,7 +30,13 @@ private:
     void DrawMenuBar();
     void DrawTimeline();      // ImPlot memory-over-time graph(s) + cursor
     void DrawSummary();       // grouped memory totals at the selected time
-    void DrawAllocations();   // table of all objects live at the selected time
+    void DrawAllocations();   // tabbed object tables (active / range deltas)
+
+    // One filtered, sortable object table inside a tab. `include` selects which
+    // objects to list; `ref_t` is the time used for the age column; `noun` is
+    // the word in the "N <noun>" summary line.
+    void DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
+                        const std::function<bool(const Obj&)>& include);
 
     // Draw one memory-over-time plot. heap_filter: 0 = all heaps, 1 = device-
     // local only (excludes Upload/Readback), 2 = host-visible only (Upload +
@@ -56,6 +63,13 @@ private:
     double       xlink_min_   = 0.0;
     double       xlink_max_   = 0.0;
     bool         xlink_valid_ = false;
+
+    // Shift-drag time-range selection on the timeline (for leak hunting).
+    bool         range_valid_     = false;
+    uint64_t     range_start_     = 0;
+    uint64_t     range_end_       = 0;
+    bool         dragging_range_  = false;
+    double       drag_anchor_sec_ = 0.0;
 
     char         filter_[128] = {};
     bool         first_frame_ = true;
