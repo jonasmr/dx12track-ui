@@ -1,0 +1,3 @@
+[submodule "dx12track"]
+	path = dx12track
+	url = git@github.com:jonasmr/dx12track.git

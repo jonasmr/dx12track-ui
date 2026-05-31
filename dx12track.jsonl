@@ -1,0 +1,1268 @@
+{"event":"hello","ts_ns":0,"pid":3980,"protocol":1,"qpc_freq":10000000,"exe":"D:\\git\\dx12-track\\DirectX-Graphics-Samples\\MiniEngine\\Build\\x64\\Debug\\Output\\ModelViewer\\ModelViewer.exe"}
+{"event":"created","ts_ns":0,"id":1,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"destroyed","ts_ns":37700,"id":1}
+{"event":"created","ts_ns":177500,"id":2,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"destroyed","ts_ns":189900,"id":2}
+{"event":"created","ts_ns":28795600,"id":3,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"destroyed","ts_ns":28818200,"id":3}
+{"event":"created","ts_ns":28946400,"id":4,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"destroyed","ts_ns":28957500,"id":4}
+{"event":"created","ts_ns":46274700,"id":5,"type":"CommandQueue","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":46308400,"id":5,"name":"CommandListManager::m_CommandQueue"}
+{"event":"created","ts_ns":46332800,"id":6,"type":"Fence","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":46342300,"id":6,"name":"CommandListManager::m_pFence"}
+{"event":"created","ts_ns":49269400,"id":7,"type":"CommandQueue","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":49288900,"id":7,"name":"CommandListManager::m_CommandQueue"}
+{"event":"created","ts_ns":49302100,"id":8,"type":"Fence","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":49310300,"id":8,"name":"CommandListManager::m_pFence"}
+{"event":"created","ts_ns":49843300,"id":9,"type":"CommandQueue","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":49859400,"id":9,"name":"CommandListManager::m_CommandQueue"}
+{"event":"created","ts_ns":49872900,"id":10,"type":"Fence","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":49880800,"id":10,"name":"CommandListManager::m_pFence"}
+{"event":"created","ts_ns":49937000,"id":11,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":50351400,"id":12,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":28,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":50367100,"id":12,"name":"Texture"}
+{"event":"created","ts_ns":50424900,"id":13,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":50442200,"id":13,"name":"CommandAllocator 0"}
+{"event":"created","ts_ns":50874400,"id":14,"type":"CommandList","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":50899500,"id":14,"name":"CommandList"}
+{"event":"created","ts_ns":51353600,"id":15,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":2097152,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":51374000,"id":15,"name":"LinearAllocator Page"}
+{"event":"created","ts_ns":51761700,"id":16,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":57547800,"id":17,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":28,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":57572000,"id":17,"name":"Texture"}
+{"event":"created","ts_ns":59091000,"id":18,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":28,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":59194700,"id":18,"name":"Texture"}
+{"event":"created","ts_ns":59772600,"id":19,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":28,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":59797500,"id":19,"name":"Texture"}
+{"event":"created","ts_ns":60278300,"id":20,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":28,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":60304700,"id":20,"name":"Texture"}
+{"event":"created","ts_ns":60760700,"id":21,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":28,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":60784600,"id":21,"name":"Texture"}
+{"event":"created","ts_ns":61339700,"id":22,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":28,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":61362100,"id":22,"name":"Texture"}
+{"event":"created","ts_ns":61807600,"id":23,"type":"CommandSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":61830100,"id":23,"name":"CommandSignature"}
+{"event":"created","ts_ns":61844700,"id":24,"type":"CommandSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":61853700,"id":24,"name":"CommandSignature"}
+{"event":"created","ts_ns":62116500,"id":25,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":3036,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":62130900,"id":25,"name":"Bitonic sort dispatch args"}
+{"event":"created","ts_ns":62211300,"id":26,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":62221500,"id":26,"name":"Bitonic Sort"}
+{"event":"created","ts_ns":62815700,"id":27,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":62836600,"id":27,"name":"Bitonic Sort: Indirect Args CS"}
+{"event":"created","ts_ns":63563300,"id":28,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":63582600,"id":28,"name":"Bitonic Sort: 32 Pre Sort CS"}
+{"event":"created","ts_ns":64176600,"id":29,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":64194400,"id":29,"name":"Bitonic Sort: 32 Inner Sort CS"}
+{"event":"created","ts_ns":64515500,"id":30,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":64533500,"id":30,"name":"Bitonic Sort: 32 Outer Sort CS"}
+{"event":"created","ts_ns":65336900,"id":31,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":65359700,"id":31,"name":"Bitonic Sort: 64 Pre Sort CS"}
+{"event":"created","ts_ns":66048100,"id":32,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":66067700,"id":32,"name":"Bitonic Sort: 64 Inner Sort CS"}
+{"event":"created","ts_ns":66404400,"id":33,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":66423100,"id":33,"name":"Bitonic Sort: 64 Outer Sort CS"}
+{"event":"created","ts_ns":66471300,"id":34,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":66480100,"id":34,"name":"GraphicsCommonRS"}
+{"event":"created","ts_ns":67162900,"id":35,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":67182600,"id":35,"name":"Generate Mips Linear CS"}
+{"event":"created","ts_ns":67848300,"id":36,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":67871400,"id":36,"name":"Generate Mips Linear Odd X CS"}
+{"event":"created","ts_ns":68544900,"id":37,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":68565500,"id":37,"name":"Generate Mips Linear Odd Y CS"}
+{"event":"created","ts_ns":69237700,"id":38,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":69257100,"id":38,"name":"Generate Mips Linear Odd CS"}
+{"event":"created","ts_ns":70013500,"id":39,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":70032900,"id":39,"name":"Generate Mips Gamma CS"}
+{"event":"created","ts_ns":70841200,"id":40,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":70863100,"id":40,"name":"Generate Mips Gamma Odd X CS"}
+{"event":"created","ts_ns":71631200,"id":41,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":71651200,"id":41,"name":"Generate Mips Gamma Odd Y CS"}
+{"event":"created","ts_ns":72517500,"id":42,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":72551700,"id":42,"name":"Generate Mips Gamma Odd CS"}
+{"event":"created","ts_ns":73170800,"id":43,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":73199100,"id":43,"name":"DownsampleDepth PSO"}
+{"event":"created","ts_ns":73535100,"id":44,"type":"Fence","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":73587400,"id":44,"name":"Internal DXGI Fence"}
+{"event":"created","ts_ns":73638000,"id":45,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":73651600,"id":45,"name":"Internal DXGI CommandAllocator"}
+{"event":"created","ts_ns":74110700,"id":46,"type":"CommandList","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":74130800,"id":46,"name":"Internal DXGI CommandList"}
+{"event":"created","ts_ns":101609900,"id":47,"type":"Fence","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":101658800,"id":48,"type":"Fence","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":102684000,"id":49,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":102781300,"id":50,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":102793300,"id":50,"name":"Present"}
+{"event":"created","ts_ns":103516600,"id":51,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":103540700,"id":51,"name":"Core: BlendUI"}
+{"event":"created","ts_ns":104153500,"id":52,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":104175100,"id":52,"name":"Core: BlendUI"}
+{"event":"created","ts_ns":104789300,"id":53,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":104810500,"id":53,"name":"Core: BlendUI"}
+{"event":"created","ts_ns":105430400,"id":54,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":105453600,"id":54,"name":"Core: BlendUI"}
+{"event":"created","ts_ns":106199200,"id":55,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":106220600,"id":55,"name":"Core: BlendUI"}
+{"event":"created","ts_ns":107030100,"id":56,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":107051600,"id":56,"name":"Core: BlendUI"}
+{"event":"created","ts_ns":107885300,"id":57,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":107906600,"id":57,"name":"Core: BlendUI"}
+{"event":"created","ts_ns":108417700,"id":58,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":108438500,"id":58,"name":"Core: BlendUI"}
+{"event":"created","ts_ns":108895000,"id":59,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":108916000,"id":59,"name":"Core: BlendUI"}
+{"event":"created","ts_ns":109791200,"id":60,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":8978432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":109818400,"id":60,"name":"Main Color Buffer"}
+{"event":"created","ts_ns":110752300,"id":61,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":10,"size":16842752,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":110778400,"id":61,"name":"Normals Buffer"}
+{"event":"created","ts_ns":111539800,"id":62,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":42,"size":8978432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":111566800,"id":62,"name":"Motion Vectors"}
+{"event":"created","ts_ns":112307600,"id":63,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":42,"size":8978432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":112333400,"id":63,"name":"Post Effects Buffer"}
+{"event":"created","ts_ns":112839100,"id":64,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":53,"size":4718592,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":112858400,"id":64,"name":"Linear Depth 0"}
+{"event":"created","ts_ns":113384900,"id":65,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":53,"size":4718592,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":113402000,"id":65,"name":"Linear Depth 1"}
+{"event":"created","ts_ns":113767200,"id":66,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":42,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":113793200,"id":66,"name":"MinMaxDepth 8x8"}
+{"event":"created","ts_ns":114229800,"id":67,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":42,"size":131072,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":114252300,"id":67,"name":"MinMaxDepth 16x16"}
+{"event":"created","ts_ns":114592300,"id":68,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":42,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":114610000,"id":68,"name":"MinMaxDepth 32x32"}
+{"event":"created","ts_ns":115345300,"id":69,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":39,"size":9240576,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":115371300,"id":69,"name":"Scene Depth Buffer"}
+{"event":"created","ts_ns":115414900,"id":70,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":116001800,"id":71,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":2621440,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":116066700,"id":71,"name":"SSAO Full Res"}
+{"event":"created","ts_ns":116612100,"id":72,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":39,"size":2686976,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":116638000,"id":72,"name":"Depth Down-Sized 1"}
+{"event":"created","ts_ns":117079100,"id":73,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":39,"size":851968,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":117099500,"id":73,"name":"Depth Down-Sized 2"}
+{"event":"created","ts_ns":117439400,"id":74,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":39,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":117456600,"id":74,"name":"Depth Down-Sized 3"}
+{"event":"created","ts_ns":117822100,"id":75,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":39,"size":131072,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":117840900,"id":75,"name":"Depth Down-Sized 4"}
+{"event":"created","ts_ns":118288200,"id":76,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":54,"size":1310720,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":118314100,"id":76,"name":"Depth De-Interleaved 1"}
+{"event":"created","ts_ns":118670900,"id":77,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":54,"size":393216,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":118688800,"id":77,"name":"Depth De-Interleaved 2"}
+{"event":"created","ts_ns":119163800,"id":78,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":54,"size":131072,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":119189600,"id":78,"name":"Depth De-Interleaved 3"}
+{"event":"created","ts_ns":119622300,"id":79,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":54,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":119649700,"id":79,"name":"Depth De-Interleaved 4"}
+{"event":"created","ts_ns":120173300,"id":80,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":786432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":120199600,"id":80,"name":"AO Re-Interleaved 1"}
+{"event":"created","ts_ns":120616200,"id":81,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":120643700,"id":81,"name":"AO Re-Interleaved 2"}
+{"event":"created","ts_ns":121033200,"id":82,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":121051500,"id":82,"name":"AO Re-Interleaved 3"}
+{"event":"created","ts_ns":121432700,"id":83,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":121454000,"id":83,"name":"AO Re-Interleaved 4"}
+{"event":"created","ts_ns":121799100,"id":84,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":786432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":121816300,"id":84,"name":"AO Smoothed 1"}
+{"event":"created","ts_ns":122218700,"id":85,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":122244300,"id":85,"name":"AO Smoothed 2"}
+{"event":"created","ts_ns":122616300,"id":86,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":122634700,"id":86,"name":"AO Smoothed 3"}
+{"event":"created","ts_ns":122971800,"id":87,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":786432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":122994700,"id":87,"name":"AO High Quality 1"}
+{"event":"created","ts_ns":123342400,"id":88,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":123359900,"id":88,"name":"AO High Quality 2"}
+{"event":"created","ts_ns":123684700,"id":89,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":123701700,"id":89,"name":"AO High Quality 3"}
+{"event":"created","ts_ns":124001500,"id":90,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":124018400,"id":90,"name":"AO High Quality 4"}
+{"event":"created","ts_ns":124631700,"id":91,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":53,"size":8716288,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":124651000,"id":91,"name":"Shadow Map"}
+{"event":"created","ts_ns":125302800,"id":92,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":131072,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":125328000,"id":92,"name":"DoF Tile Classification Buffer 0"}
+{"event":"created","ts_ns":125799500,"id":93,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":131072,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":125825600,"id":93,"name":"DoF Tile Classification Buffer 1"}
+{"event":"created","ts_ns":126395300,"id":94,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":2686976,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":126421100,"id":94,"name":"DoF Presort Buffer"}
+{"event":"created","ts_ns":126919000,"id":95,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":2686976,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":126939600,"id":95,"name":"DoF PreFilter Buffer"}
+{"event":"created","ts_ns":127431400,"id":96,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":2686976,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":127452000,"id":96,"name":"DoF Blur Color"}
+{"event":"created","ts_ns":127936100,"id":97,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":2686976,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":127962100,"id":97,"name":"DoF Blur Color"}
+{"event":"created","ts_ns":128437500,"id":98,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":786432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":128462900,"id":98,"name":"DoF FG Alpha"}
+{"event":"created","ts_ns":128823700,"id":99,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":786432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":128847400,"id":99,"name":"DoF FG Alpha"}
+{"event":"created","ts_ns":129131100,"id":100,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":32640,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":129148500,"id":100,"name":"DoF Work Queue"}
+{"event":"created","ts_ns":129381900,"id":101,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":129396800,"id":101,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":129709300,"id":102,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":32640,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":129750900,"id":102,"name":"DoF Fast Queue"}
+{"event":"created","ts_ns":130189700,"id":103,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":130215000,"id":103,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":130669900,"id":104,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":32640,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":130699100,"id":104,"name":"DoF Fixup Queue"}
+{"event":"created","ts_ns":131054100,"id":105,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":131082200,"id":105,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":132020100,"id":106,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":10,"size":16842752,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":132046100,"id":106,"name":"Temporal Color 0"}
+{"event":"created","ts_ns":132959500,"id":107,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":10,"size":16842752,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":132985800,"id":107,"name":"Temporal Color 1"}
+{"event":"created","ts_ns":134020100,"id":108,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":8978432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":134046500,"id":108,"name":"Temporal Min Color"}
+{"event":"created","ts_ns":134734200,"id":109,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":8978432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":134760000,"id":109,"name":"Temporal Max Color"}
+{"event":"created","ts_ns":135511500,"id":110,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":10,"size":4784128,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":135549500,"id":110,"name":"Motion Blur Prep"}
+{"event":"created","ts_ns":136033100,"id":111,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":61,"size":2621440,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":136052000,"id":111,"name":"Luminance"}
+{"event":"created","ts_ns":136370400,"id":112,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":1024,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":136386300,"id":112,"name":"Histogram"}
+{"event":"created","ts_ns":136736600,"id":113,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":62,"size":262144,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":136753000,"id":113,"name":"Luma Buffer"}
+{"event":"created","ts_ns":137192500,"id":114,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":1048576,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":137218100,"id":114,"name":"Bloom Buffer 1a"}
+{"event":"created","ts_ns":137830700,"id":115,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":1048576,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":137850100,"id":115,"name":"Bloom Buffer 1b"}
+{"event":"created","ts_ns":138206200,"id":116,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":262144,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":138221200,"id":116,"name":"Bloom Buffer 2a"}
+{"event":"created","ts_ns":138538100,"id":117,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":262144,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":138555200,"id":117,"name":"Bloom Buffer 2b"}
+{"event":"created","ts_ns":139017700,"id":118,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":139043400,"id":118,"name":"Bloom Buffer 3a"}
+{"event":"created","ts_ns":139395900,"id":119,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":139412800,"id":119,"name":"Bloom Buffer 3b"}
+{"event":"created","ts_ns":139706300,"id":120,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":139741500,"id":120,"name":"Bloom Buffer 4a"}
+{"event":"created","ts_ns":140135300,"id":121,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":140161200,"id":121,"name":"Bloom Buffer 4b"}
+{"event":"created","ts_ns":140542000,"id":122,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":140561000,"id":122,"name":"Bloom Buffer 5a"}
+{"event":"created","ts_ns":140856600,"id":123,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":140872200,"id":123,"name":"Bloom Buffer 5b"}
+{"event":"created","ts_ns":141308600,"id":124,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":2074112,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":141335400,"id":124,"name":"FXAA Work Queue"}
+{"event":"created","ts_ns":141747700,"id":125,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":2074112,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":141773900,"id":125,"name":"FXAA Color Queue"}
+{"event":"created","ts_ns":142563600,"id":126,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":12845056,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":142587800,"id":126,"name":"GenMips"}
+{"event":"created","ts_ns":143353400,"id":127,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":27,"size":8978432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":143379800,"id":127,"name":"UI Overlay"}
+{"event":"created","ts_ns":144082000,"id":128,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":8978432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":144107900,"id":128,"name":"Bicubic Intermediate"}
+{"event":"created","ts_ns":144991900,"id":129,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":24,"size":8978432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":145043200,"id":129,"name":"PreDisplay Buffer"}
+{"event":"created","ts_ns":145839400,"id":130,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":145864700,"id":130,"name":"Image Scaling: Bilinear Upsample PSO"}
+{"event":"created","ts_ns":146663300,"id":131,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":146686100,"id":131,"name":"Image Scaling: Bilinear Upsample PSO"}
+{"event":"created","ts_ns":147619500,"id":132,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":147644500,"id":132,"name":"Image Scaling: Bilinear Upsample PSO"}
+{"event":"created","ts_ns":148669400,"id":133,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":148688800,"id":133,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":149673300,"id":134,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":149697600,"id":134,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":150940500,"id":135,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":150965600,"id":135,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":151925400,"id":136,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":151946400,"id":136,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":152773800,"id":137,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":152796900,"id":137,"name":"Image Scaling: Bilinear Upsample PSO"}
+{"event":"created","ts_ns":153553600,"id":138,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":153638700,"id":138,"name":"Image Scaling: Bilinear Upsample PSO"}
+{"event":"created","ts_ns":154545800,"id":139,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":154569800,"id":139,"name":"Image Scaling: Bilinear Upsample PSO"}
+{"event":"created","ts_ns":155814800,"id":140,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":155840000,"id":140,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":156818500,"id":141,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":156840500,"id":141,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":157748700,"id":142,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":157770800,"id":142,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":158728200,"id":143,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":158753300,"id":143,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":159192800,"id":144,"type":"Resource","alloc":"Committed","heap":"Readback","dim":"Buffer","format":0,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":159213000,"id":144,"name":"GpuTimeStamp Buffer"}
+{"event":"created","ts_ns":159508900,"id":145,"type":"QueryHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":159524100,"id":145,"name":"GpuTimeStamp QueryHeap"}
+{"event":"created","ts_ns":161139300,"id":146,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":161162900,"id":146,"name":"TAA: Temporal Blend CS"}
+{"event":"created","ts_ns":161691900,"id":147,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":161712800,"id":147,"name":"TAA: Bound Neighborhood CS"}
+{"event":"created","ts_ns":162406600,"id":148,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":162428100,"id":148,"name":"TAA: Sharpen TAA CS"}
+{"event":"created","ts_ns":162895100,"id":149,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":162915300,"id":149,"name":"TAA: Resolve TAA CS"}
+{"event":"created","ts_ns":163024200,"id":150,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":163040900,"id":150,"name":"Post Effects"}
+{"event":"created","ts_ns":163687400,"id":151,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":163707500,"id":151,"name":"Post Effects: Tone Map  CS"}
+{"event":"created","ts_ns":164441700,"id":152,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":164462800,"id":152,"name":"Post Effects: Tone Map HDR CS"}
+{"event":"created","ts_ns":165230500,"id":153,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":165255400,"id":153,"name":"Post Effects: Apply Bloom CS"}
+{"event":"created","ts_ns":165927800,"id":154,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":166090000,"id":154,"name":"Post Effects: Debug Luminance HDR CS"}
+{"event":"created","ts_ns":166735500,"id":155,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":166759800,"id":155,"name":"Post Effects: Debug Luminance LDR CS"}
+{"event":"created","ts_ns":167124400,"id":156,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":167145100,"id":156,"name":"Post Effects: Generate Histogram CS"}
+{"event":"created","ts_ns":167671800,"id":157,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":167695000,"id":157,"name":"Post Effects: Draw Histogram CS"}
+{"event":"created","ts_ns":168340300,"id":158,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":168361500,"id":158,"name":"Post Effects: Adapt Exposure CS"}
+{"event":"created","ts_ns":168891600,"id":159,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":168912500,"id":159,"name":"Post Effects: Downsample Bloom 2 CS"}
+{"event":"created","ts_ns":169431200,"id":160,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":169452500,"id":160,"name":"Post Effects: Downsample Bloom 4 CS"}
+{"event":"created","ts_ns":170640400,"id":161,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":170663000,"id":161,"name":"Post Effects: Upsample and Blur CS"}
+{"event":"created","ts_ns":171690400,"id":162,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":171712800,"id":162,"name":"Post Effects: Blur CS"}
+{"event":"created","ts_ns":172444400,"id":163,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":172467300,"id":163,"name":"Post Effects: Bloom Extract and Downsample HDR CS"}
+{"event":"created","ts_ns":173114500,"id":164,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":173135600,"id":164,"name":"Post Effects: Bloom Extract and Downsample LDR CS"}
+{"event":"created","ts_ns":173710000,"id":165,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":173730900,"id":165,"name":"Post Effects: Extract Luma CS"}
+{"event":"created","ts_ns":174085800,"id":166,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":174106600,"id":166,"name":"Post Effects: Average Luma CS"}
+{"event":"created","ts_ns":174555800,"id":167,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":174576100,"id":167,"name":"Post Effects: Copy Back Post Buffer CS"}
+{"event":"created","ts_ns":175162400,"id":168,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":32,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":175619300,"id":168,"name":"Exposure"}
+{"event":"created","ts_ns":176020800,"id":169,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":176045600,"id":169,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":176105300,"id":170,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":176115800,"id":170,"name":"FXAA"}
+{"event":"created","ts_ns":176499500,"id":171,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":176521700,"id":171,"name":"FXAA: Resolve Work CS"}
+{"event":"created","ts_ns":177345200,"id":172,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":177370400,"id":172,"name":"FXAA: Pass 1 LDR CS"}
+{"event":"created","ts_ns":178357200,"id":173,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":178382300,"id":173,"name":"FXAA: Pass 1 HDR CS"}
+{"event":"created","ts_ns":179256600,"id":174,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":179286600,"id":174,"name":"FXAA: Pass 2 H CS"}
+{"event":"created","ts_ns":180119900,"id":175,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":180146000,"id":175,"name":"FXAA: Pass 2 V CS"}
+{"event":"created","ts_ns":180938500,"id":176,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":180965300,"id":176,"name":"FXAA: Pass 2 H Debug CS"}
+{"event":"created","ts_ns":181832400,"id":177,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":181875500,"id":177,"name":"FXAA: Pass 2 V Debug CS"}
+{"event":"created","ts_ns":182332000,"id":178,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":24,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":182486800,"id":178,"name":"FXAA Indirect Parameters"}
+{"event":"created","ts_ns":182888200,"id":179,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":8,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":182914400,"id":179,"name":"FXAA Work Counters"}
+{"event":"created","ts_ns":183341400,"id":180,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":184137200,"id":181,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":184161200,"id":181,"name":"Motion Blur: Motion Blur Final Pass CS"}
+{"event":"created","ts_ns":185496700,"id":182,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":185532500,"id":182,"name":"Motion Blur: Camera Motion Blur Pre-Pass CS"}
+{"event":"created","ts_ns":186429900,"id":183,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":186451200,"id":183,"name":"Motion Blur: Camera Motion Blur Pre-Pass Linear Z CS"}
+{"event":"created","ts_ns":187024600,"id":184,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":187049300,"id":184,"name":"Motion Blur: Motion Blur Pre-Pass CS"}
+{"event":"created","ts_ns":187575600,"id":185,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":187596800,"id":185,"name":"Motion Blur: Camera Velocity CS"}
+{"event":"created","ts_ns":187673300,"id":186,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":187687700,"id":186,"name":"Depth of Field"}
+{"event":"created","ts_ns":188370100,"id":187,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":188391900,"id":187,"name":"DOF: Pass 1 CS"}
+{"event":"created","ts_ns":189211800,"id":188,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":189235000,"id":188,"name":"DOF: Tile Pass CS"}
+{"event":"created","ts_ns":189837600,"id":189,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":189858900,"id":189,"name":"DOF: Tile Pass Fixup CS"}
+{"event":"created","ts_ns":191410500,"id":190,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":191435000,"id":190,"name":"DOF: Pre-Filter CS"}
+{"event":"created","ts_ns":192453300,"id":191,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":192475200,"id":191,"name":"DOF: Pre-Filter Fast CS"}
+{"event":"created","ts_ns":192982100,"id":192,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":193002800,"id":192,"name":"DOF: Pre-Filter Fixup CS"}
+{"event":"created","ts_ns":199779900,"id":193,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":199804600,"id":193,"name":"DOF: Pass 2 CS"}
+{"event":"created","ts_ns":201503300,"id":194,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":201529100,"id":194,"name":"DOF: Pass 2 Fast CS"}
+{"event":"created","ts_ns":202018100,"id":195,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":202039300,"id":195,"name":"DOF: Pass 2 Fixup CS"}
+{"event":"created","ts_ns":208440200,"id":196,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":208467000,"id":196,"name":"DOF: Pass 2 Debug CS"}
+{"event":"created","ts_ns":209406200,"id":197,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":209428800,"id":197,"name":"DOF: Median Filter CS"}
+{"event":"created","ts_ns":210397800,"id":198,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":210420800,"id":198,"name":"DOF: Median Filter Separate Alpha CS"}
+{"event":"created","ts_ns":210933100,"id":199,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":210956000,"id":199,"name":"DOF: Median Filter Fixup CS"}
+{"event":"created","ts_ns":211673400,"id":200,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":211693200,"id":200,"name":"DOF: Combine CS"}
+{"event":"created","ts_ns":212395400,"id":201,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":212416000,"id":201,"name":"DOF: Combine Fast CS"}
+{"event":"created","ts_ns":212995700,"id":202,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":213028900,"id":202,"name":"DOF: Debug Red CS"}
+{"event":"created","ts_ns":213463100,"id":203,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":213485800,"id":203,"name":"DOF: Debug Green CS"}
+{"event":"created","ts_ns":213901300,"id":204,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":213922900,"id":204,"name":"DOF: Debug Blue CS"}
+{"event":"created","ts_ns":214333700,"id":205,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":36,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":214732700,"id":205,"name":"DoF Indirect Parameters"}
+{"event":"created","ts_ns":214805500,"id":206,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":214815600,"id":206,"name":"SSAO"}
+{"event":"created","ts_ns":215578900,"id":207,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":215685500,"id":207,"name":"SSAO: Depth Prepare 1 CS"}
+{"event":"created","ts_ns":216065100,"id":208,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":216087300,"id":208,"name":"SSAO: Depth Prepare 2 CS"}
+{"event":"created","ts_ns":216390200,"id":209,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":216411100,"id":209,"name":"SSAO: Linearize Depth CS"}
+{"event":"created","ts_ns":216779600,"id":210,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":216826600,"id":210,"name":"SSAO: Debug CS"}
+{"event":"created","ts_ns":218350500,"id":211,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":218371100,"id":211,"name":"SSAO: Render 1 CS"}
+{"event":"created","ts_ns":219383400,"id":212,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":219403200,"id":212,"name":"SSAO: Render 2 CS"}
+{"event":"created","ts_ns":220453700,"id":213,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":220474100,"id":213,"name":"SSAO: Blur Upsample Blend Low Q. CS"}
+{"event":"created","ts_ns":221541000,"id":214,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":221561200,"id":214,"name":"SSAO: Blur Upsample Blend High Q. CS"}
+{"event":"created","ts_ns":222611000,"id":215,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":222631100,"id":215,"name":"SSAO: Blur Upsample Final Low Q. CS"}
+{"event":"created","ts_ns":223653200,"id":216,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":223673200,"id":216,"name":"SSAO: Blur Upsample Final High Q. CS"}
+{"event":"created","ts_ns":223723800,"id":217,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":223733000,"id":217,"name":"TextRenderer"}
+{"event":"created","ts_ns":224469500,"id":218,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":224492500,"id":218,"name":"Text Render: Text R8G8B8A8_UNORM PSO"}
+{"event":"created","ts_ns":224631100,"id":219,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":224645100,"id":219,"name":"Text Render: Text R8G8B8A8_UNORM PSO"}
+{"event":"created","ts_ns":225097100,"id":220,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":225123700,"id":220,"name":"Text Render: Text R8G8B8A8_UNORM PSO"}
+{"event":"created","ts_ns":225278200,"id":221,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":225294800,"id":221,"name":"Text Render: Text R8G8B8A8_UNORM PSO"}
+{"event":"created","ts_ns":225340100,"id":222,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":225350100,"id":222,"name":"Graph Renderer"}
+{"event":"created","ts_ns":225933600,"id":223,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":225955900,"id":223,"name":"Graph Renderer: Render Perf Graph PSO"}
+{"event":"created","ts_ns":226303100,"id":224,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":226324800,"id":224,"name":"Graph Renderer: Render Perf Graph PSO"}
+{"event":"created","ts_ns":226383600,"id":225,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":226394400,"id":225,"name":"Particle Effects"}
+{"event":"created","ts_ns":227057300,"id":226,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":227076100,"id":226,"name":"Particles: Particle Spawn CS"}
+{"event":"created","ts_ns":227845100,"id":227,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":227864800,"id":227,"name":"Particles: Particle Update CS"}
+{"event":"created","ts_ns":228091000,"id":228,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":228108800,"id":228,"name":"Particles: Particle Dispatch Indirect Args CS"}
+{"event":"created","ts_ns":228420500,"id":229,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":228438500,"id":229,"name":"Particles: Particle Final Dispatch Indirect Args CS"}
+{"event":"created","ts_ns":229290700,"id":230,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":229320700,"id":230,"name":"Particles: Particle Large Bin Culling CS"}
+{"event":"created","ts_ns":229967100,"id":231,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":229988000,"id":231,"name":"Particles: Particle Bin Culling CS"}
+{"event":"created","ts_ns":230924200,"id":232,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":230944300,"id":232,"name":"Particles: Particle Tile Culling CS"}
+{"event":"created","ts_ns":232371400,"id":233,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":232392300,"id":233,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":233663500,"id":234,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":233690000,"id":234,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":235224700,"id":235,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":235309700,"id":235,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":236530000,"id":236,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":236552400,"id":236,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":238227800,"id":237,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":238252700,"id":237,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":239627400,"id":238,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":239653600,"id":238,"name":"Unnamed Compute PSO"}
+{"event":"created","ts_ns":240372900,"id":239,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":240394400,"id":239,"name":"Particles: Particle Depth Bounds CS"}
+{"event":"created","ts_ns":240780600,"id":240,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":240801500,"id":240,"name":"Particles: Particle Sort Indirect Args CS"}
+{"event":"created","ts_ns":241750500,"id":241,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":241773500,"id":241,"name":"Particles: Particle Pre Sort CS"}
+{"event":"created","ts_ns":242895800,"id":242,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":242918500,"id":242,"name":"Unnamed Graphics PSO"}
+{"event":"created","ts_ns":243650700,"id":243,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":243673300,"id":243,"name":"Unnamed Graphics PSO"}
+{"event":"created","ts_ns":244184400,"id":244,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":16,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":244391100,"id":244,"name":"ParticleEffectManager::DrawIndirectArgs"}
+{"event":"created","ts_ns":244970000,"id":245,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":12,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":245174600,"id":245,"name":"ParticleEffectManager::FinalDispatchIndirectArgs"}
+{"event":"created","ts_ns":245965900,"id":246,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":9437184,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":245992700,"id":246,"name":"ParticleEffectManager::SpriteVertexBuffer"}
+{"event":"created","ts_ns":246388100,"id":247,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":246404000,"id":247,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":247048100,"id":248,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":12582912,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":247081500,"id":248,"name":"ParticleEffectManager::VisibleParticleBuffer"}
+{"event":"created","ts_ns":247478500,"id":249,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":247495700,"id":249,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":247918800,"id":250,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":1048576,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":247945400,"id":250,"name":"ParticleEffectManager::SpriteIndexBuffer"}
+{"event":"created","ts_ns":248311400,"id":251,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":248327300,"id":251,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":248612300,"id":252,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":12,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":248627500,"id":252,"name":"ParticleEffectManager::SortIndirectArgs"}
+{"event":"created","ts_ns":248917900,"id":253,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":24,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":249055400,"id":253,"name":"ParticleEffectManager::DrawPackets_IArgs"}
+{"event":"created","ts_ns":249519000,"id":254,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4718592,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":249538200,"id":254,"name":"ParticleEffectManager::BinParticles[0]"}
+{"event":"created","ts_ns":249961200,"id":255,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":249988000,"id":255,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":250435500,"id":256,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4718592,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":250452300,"id":256,"name":"ParticleEffectManager::BinParticles[1]"}
+{"event":"created","ts_ns":250773300,"id":257,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":250800100,"id":257,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":251258600,"id":258,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":288,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":251285200,"id":258,"name":"ParticleEffectManager::LargeBinCounters"}
+{"event":"created","ts_ns":251634500,"id":259,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4608,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":251651500,"id":259,"name":"ParticleEffectManager::BinCounters"}
+{"event":"created","ts_ns":252045000,"id":260,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":147456,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":252073100,"id":260,"name":"ParticleEffectManager::TileCounters"}
+{"event":"created","ts_ns":252438000,"id":261,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":252453600,"id":261,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":252977600,"id":262,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4718592,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":253003700,"id":262,"name":"ParticleEffectManager::TileHitMasks"}
+{"event":"created","ts_ns":253404700,"id":263,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":129600,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":253430700,"id":263,"name":"ParticleEffectManager::DrawPackets"}
+{"event":"created","ts_ns":253753900,"id":264,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":253770300,"id":264,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":254089600,"id":265,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":129600,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":254103900,"id":265,"name":"ParticleEffectManager::FastDrawPackets"}
+{"event":"created","ts_ns":254440800,"id":266,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":254506100,"id":266,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":255161100,"id":267,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":78,"size":131072,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":255187400,"id":267,"name":"Particle TexArray"}
+{"event":"created","ts_ns":386179900,"id":268,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":386258600,"id":268,"name":"RootSig"}
+{"event":"created","ts_ns":387232800,"id":269,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":387347100,"id":269,"name":"Renderer: Depth Only PSO"}
+{"event":"created","ts_ns":388635700,"id":270,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":388750200,"id":270,"name":"Renderer: Depth Only PSO"}
+{"event":"created","ts_ns":389934900,"id":271,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":389965900,"id":271,"name":"Renderer: Depth Only PSO"}
+{"event":"created","ts_ns":391217700,"id":272,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":391244600,"id":272,"name":"Renderer: Depth Only PSO"}
+{"event":"created","ts_ns":391413100,"id":273,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":391426300,"id":273,"name":"Renderer: Depth Only PSO"}
+{"event":"created","ts_ns":391553500,"id":274,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":391564800,"id":274,"name":"Renderer: Depth Only PSO"}
+{"event":"created","ts_ns":391683800,"id":275,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":391694000,"id":275,"name":"Renderer: Depth Only PSO"}
+{"event":"created","ts_ns":391839900,"id":276,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":391850500,"id":276,"name":"Renderer: Depth Only PSO"}
+{"event":"created","ts_ns":392588500,"id":277,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":392610600,"id":277,"name":"Renderer: Default PSO"}
+{"event":"created","ts_ns":393302400,"id":278,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":393328200,"id":278,"name":"Scene Texture Descriptors"}
+{"event":"created","ts_ns":393839500,"id":279,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":393865200,"id":279,"name":"Scene Sampler Descriptors"}
+{"event":"created","ts_ns":393917000,"id":280,"type":"RootSignature","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":393927600,"id":280,"name":"FillLightRS"}
+{"event":"created","ts_ns":395009200,"id":281,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":395051700,"id":281,"name":"Fill Light Grid 8 CS"}
+{"event":"created","ts_ns":396041700,"id":282,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":396063000,"id":282,"name":"Fill Light Grid 16 CS"}
+{"event":"created","ts_ns":396991800,"id":283,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":397012100,"id":283,"name":"Fill Light Grid 24 CS"}
+{"event":"created","ts_ns":397925000,"id":284,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":397959600,"id":284,"name":"Fill Light Grid 32 CS"}
+{"event":"created","ts_ns":399972400,"id":285,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":66873600,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":399998800,"id":285,"name":"m_LightGrid"}
+{"event":"created","ts_ns":400873500,"id":286,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":2073600,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":400900200,"id":286,"name":"m_LightGridBitMask"}
+{"event":"created","ts_ns":402834200,"id":287,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":53,"size":67108864,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":402888500,"id":287,"name":"m_LightShadowArray"}
+{"event":"created","ts_ns":403762600,"id":288,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":53,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":403788800,"id":288,"name":"m_LightShadowTempBuffer"}
+{"event":"created","ts_ns":404183900,"id":289,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":14848,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":404210900,"id":289,"name":"m_LightBuffer"}
+{"event":"created","ts_ns":404590000,"id":290,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":404606500,"id":290,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":405618400,"id":291,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":95,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":406217300,"id":291,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":411534900,"id":292,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":95,"size":8650752,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":412259700,"id":293,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":8410880,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":412285900,"id":293,"name":"LinearAllocator Page"}
+{"event":"renamed","ts_ns":413288300,"id":292,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":414387300,"id":294,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":95,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"destroyed","ts_ns":414973800,"id":293}
+{"event":"renamed","ts_ns":415007700,"id":294,"name":"DDSTextureLoader"}
+{"event":"destroyed","ts_ns":415307000,"id":294}
+{"event":"created","ts_ns":415959000,"id":295,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":95,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":416203900,"id":295,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":421874000,"id":296,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":95,"size":8650752,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":422984800,"id":297,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":8410880,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":423011100,"id":297,"name":"LinearAllocator Page"}
+{"event":"renamed","ts_ns":423984000,"id":296,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":425125700,"id":298,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":95,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"destroyed","ts_ns":425554100,"id":297}
+{"event":"renamed","ts_ns":425587400,"id":298,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":431623300,"id":299,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":95,"size":8650752,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":432293600,"id":300,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":8410880,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":432319600,"id":300,"name":"LinearAllocator Page"}
+{"event":"renamed","ts_ns":433648600,"id":299,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":434983600,"id":301,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":95,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"destroyed","ts_ns":435451200,"id":300}
+{"event":"renamed","ts_ns":435484000,"id":301,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":440929700,"id":302,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":95,"size":8650752,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":441484500,"id":303,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":8410880,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":441506000,"id":303,"name":"LinearAllocator Page"}
+{"event":"renamed","ts_ns":442656000,"id":302,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":445306300,"id":304,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":10,"size":3145728,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":446195700,"id":305,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":3145728,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":446221900,"id":305,"name":"LinearAllocator Page"}
+{"event":"destroyed","ts_ns":446786100,"id":303}
+{"event":"renamed","ts_ns":446820200,"id":304,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":450480400,"id":306,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":10,"size":4325376,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":451165100,"id":307,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":4226816,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":451192000,"id":307,"name":"LinearAllocator Page"}
+{"event":"destroyed","ts_ns":451869700,"id":305}
+{"event":"renamed","ts_ns":452067900,"id":306,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":453099800,"id":308,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":453122800,"id":308,"name":"Sponza: Depth PSO"}
+{"event":"created","ts_ns":453533600,"id":309,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":453555100,"id":309,"name":"Sponza: Depth PSO"}
+{"event":"created","ts_ns":453664300,"id":310,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":453675800,"id":310,"name":"Sponza: Depth PSO"}
+{"event":"created","ts_ns":453789400,"id":311,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":453801400,"id":311,"name":"Sponza: Depth PSO"}
+{"event":"created","ts_ns":456665800,"id":312,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":456691100,"id":312,"name":"Sponza: Depth PSO"}
+{"event":"created","ts_ns":456947400,"id":313,"type":"PipelineState","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":456959500,"id":313,"name":"Sponza: Depth PSO"}
+{"event":"created","ts_ns":457948600,"id":314,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":17497588,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":457976800,"id":314,"name":"Geometry Upload Buffer"}
+{"event":"created","ts_ns":467080500,"id":315,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":17497588,"parent_heap_id":0,"name":""}
+{"event":"destroyed","ts_ns":467477800,"id":307}
+{"event":"renamed","ts_ns":468048600,"id":315,"name":"Geometry Buffer"}
+{"event":"created","ts_ns":537507200,"id":316,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":537725400,"id":316,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":538335800,"id":317,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":538516600,"id":317,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":539025100,"id":318,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":71,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":539198700,"id":318,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":540151600,"id":319,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":540389500,"id":319,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":541354500,"id":320,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":541594600,"id":320,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":542419000,"id":321,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":71,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":542946600,"id":321,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":543874500,"id":322,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":544121300,"id":322,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":545135600,"id":323,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":545564800,"id":323,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":546490900,"id":324,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":546732800,"id":324,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":547579100,"id":325,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":71,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":547807100,"id":325,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":548259400,"id":326,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":548402900,"id":326,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":549293300,"id":327,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":549535700,"id":327,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":550378300,"id":328,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":550613900,"id":328,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":551418700,"id":329,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":71,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":551654600,"id":329,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":552458000,"id":330,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":552692800,"id":330,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":553497100,"id":331,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":553721000,"id":331,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":554538900,"id":332,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":71,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":554864400,"id":332,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":555734900,"id":333,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":556286100,"id":333,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":557103500,"id":334,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":557326900,"id":334,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":558141000,"id":335,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":558363800,"id":335,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":558892900,"id":336,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":559309600,"id":337,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":559763600,"id":337,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":560645700,"id":338,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":71,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":560907300,"id":338,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":561722300,"id":339,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":561961000,"id":339,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":562794300,"id":340,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":563147700,"id":340,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":564011300,"id":341,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":564266500,"id":341,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":565215900,"id":342,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":565484800,"id":342,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":566393500,"id":343,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":71,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":566649800,"id":343,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":567435400,"id":344,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":567681000,"id":344,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":568483300,"id":345,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":568727200,"id":345,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":569589600,"id":346,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":569854900,"id":346,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":570682000,"id":347,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":570958500,"id":347,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":571826400,"id":348,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":71,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":572093000,"id":348,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":572601800,"id":349,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":572782600,"id":349,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":573643200,"id":350,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":573905400,"id":350,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":574718500,"id":351,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":574984000,"id":351,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":575961200,"id":352,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":576222200,"id":352,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":577084000,"id":353,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":577338900,"id":353,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":578190500,"id":354,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":578435800,"id":354,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":579239000,"id":355,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":579480500,"id":355,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":581546500,"id":356,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":2818048,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":582024900,"id":357,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":2802432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":582043700,"id":357,"name":"LinearAllocator Page"}
+{"event":"renamed","ts_ns":582454600,"id":356,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":584549900,"id":358,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":2818048,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":585126500,"id":359,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":2802432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":585151200,"id":359,"name":"LinearAllocator Page"}
+{"event":"destroyed","ts_ns":585634700,"id":357}
+{"event":"renamed","ts_ns":585658700,"id":358,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":587910300,"id":360,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":2818048,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":588389000,"id":361,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":2802432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":588406900,"id":361,"name":"LinearAllocator Page"}
+{"event":"destroyed","ts_ns":588861700,"id":359}
+{"event":"renamed","ts_ns":588895400,"id":360,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":589598300,"id":362,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"destroyed","ts_ns":589973500,"id":361}
+{"event":"renamed","ts_ns":590005400,"id":362,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":590626300,"id":363,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":71,"size":196608,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":590860100,"id":363,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":591903100,"id":364,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":592158800,"id":364,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":593017300,"id":365,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":593460200,"id":365,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":594315600,"id":366,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":71,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":594559900,"id":366,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":595495700,"id":367,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":595847000,"id":367,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":596743800,"id":368,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":71,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":596985600,"id":368,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":597746200,"id":369,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":72,"size":720896,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":597990900,"id":369,"name":"DDSTextureLoader"}
+{"event":"destroyed","ts_ns":598303600,"id":314}
+{"event":"created","ts_ns":599284300,"id":370,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":78,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":599460600,"id":370,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":600274200,"id":371,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":64000,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":600440400,"id":371,"name":"ParticleSystem::SpawnDataBuffer"}
+{"event":"created","ts_ns":600776900,"id":372,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":600792700,"id":372,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":601113700,"id":373,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":32000,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":601128600,"id":373,"name":"ParticleSystem::Buffer0"}
+{"event":"created","ts_ns":601433400,"id":374,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":601448100,"id":374,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":601775700,"id":375,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":32000,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":601787600,"id":375,"name":"ParticleSystem::Buffer1"}
+{"event":"created","ts_ns":602174500,"id":376,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":602200900,"id":376,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":602567000,"id":377,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":12,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":602704600,"id":377,"name":"ParticleSystem::DispatchIndirectArgs"}
+{"event":"created","ts_ns":603211800,"id":378,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":78,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":603386800,"id":378,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":603852300,"id":379,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":2000,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":603962900,"id":379,"name":"ParticleSystem::SpawnDataBuffer"}
+{"event":"created","ts_ns":604305400,"id":380,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":604328600,"id":380,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":604639400,"id":381,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":1000,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":604657400,"id":381,"name":"ParticleSystem::Buffer0"}
+{"event":"created","ts_ns":605061700,"id":382,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":605086600,"id":382,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":605487200,"id":383,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":1000,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":605512800,"id":383,"name":"ParticleSystem::Buffer1"}
+{"event":"created","ts_ns":605794500,"id":384,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":605808300,"id":384,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":606074100,"id":385,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":12,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":606207700,"id":385,"name":"ParticleSystem::DispatchIndirectArgs"}
+{"event":"created","ts_ns":606679800,"id":386,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":78,"size":65536,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":606846200,"id":386,"name":"DDSTextureLoader"}
+{"event":"created","ts_ns":607240500,"id":387,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":2000,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":607346700,"id":387,"name":"ParticleSystem::SpawnDataBuffer"}
+{"event":"created","ts_ns":607619400,"id":388,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":607634300,"id":388,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":607887400,"id":389,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":1000,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":607900300,"id":389,"name":"ParticleSystem::Buffer0"}
+{"event":"created","ts_ns":608208900,"id":390,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":608234900,"id":390,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":608542600,"id":391,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":1000,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":608557100,"id":391,"name":"ParticleSystem::Buffer1"}
+{"event":"created","ts_ns":608796800,"id":392,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":4,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":608810100,"id":392,"name":"StructuredBuffer::Counter"}
+{"event":"created","ts_ns":609049800,"id":393,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Buffer","format":0,"size":12,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":609161200,"id":393,"name":"ParticleSystem::DispatchIndirectArgs"}
+{"event":"destroyed","ts_ns":657168000,"id":129}
+{"event":"created","ts_ns":658306200,"id":394,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":24,"size":8978432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":658335100,"id":394,"name":"PreDisplay Buffer"}
+{"event":"destroyed","ts_ns":658885000,"id":47}
+{"event":"destroyed","ts_ns":658920700,"id":48}
+{"event":"created","ts_ns":665539100,"id":395,"type":"Fence","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":665577000,"id":396,"type":"Fence","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"destroyed","ts_ns":665953200,"id":127}
+{"event":"created","ts_ns":666611300,"id":397,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":27,"size":8978432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":666637600,"id":397,"name":"UI Overlay"}
+{"event":"destroyed","ts_ns":666959100,"id":128}
+{"event":"created","ts_ns":667547500,"id":398,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":26,"size":8978432,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":667565300,"id":398,"name":"Bicubic Intermediate"}
+{"event":"created","ts_ns":698043700,"id":399,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":698085100,"id":399,"name":"CommandAllocator 1"}
+{"event":"created","ts_ns":699718000,"id":400,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":700196300,"id":401,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":2097152,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":700221400,"id":401,"name":"LinearAllocator Page"}
+{"event":"created","ts_ns":700897300,"id":402,"type":"Resource","alloc":"Committed","heap":"Default","dim":"Tex2D","format":63,"size":131072,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":700928100,"id":402,"name":"Texture"}
+{"event":"created","ts_ns":701016300,"id":403,"type":"CommandList","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":701041400,"id":403,"name":"CommandList"}
+{"event":"created","ts_ns":701686800,"id":404,"type":"Fence","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":701709400,"id":404,"name":"Internal DXGI Fence"}
+{"event":"created","ts_ns":701744200,"id":405,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":701755400,"id":405,"name":"Internal DXGI CommandAllocator"}
+{"event":"created","ts_ns":701902400,"id":406,"type":"CommandList","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":701939900,"id":406,"name":"Internal DXGI CommandList"}
+{"event":"created","ts_ns":702842600,"id":407,"type":"CommandQueue","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":702870500,"id":407,"name":"Internal DXGI CommandQueue"}
+{"event":"created","ts_ns":703547500,"id":408,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":703574100,"id":408,"name":"Internal DXGI CommandAllocator"}
+{"event":"created","ts_ns":706283500,"id":409,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":706312000,"id":409,"name":"CommandAllocator 2"}
+{"event":"created","ts_ns":708210800,"id":410,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":2097152,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":708236700,"id":410,"name":"LinearAllocator Page"}
+{"event":"created","ts_ns":708549800,"id":411,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":708567600,"id":411,"name":"Internal DXGI CommandAllocator"}
+{"event":"created","ts_ns":708902900,"id":412,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":708917600,"id":412,"name":"Internal DXGI CommandAllocator"}
+{"event":"created","ts_ns":712195200,"id":413,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":712281700,"id":414,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":712299500,"id":414,"name":"CommandAllocator 3"}
+{"event":"created","ts_ns":712659800,"id":415,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":712677800,"id":415,"name":"Internal DXGI CommandAllocator"}
+{"event":"created","ts_ns":715299600,"id":416,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":717026600,"id":417,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":717053800,"id":417,"name":"CommandAllocator 4"}
+{"event":"created","ts_ns":718892800,"id":418,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":718920000,"id":418,"name":"CommandAllocator 5"}
+{"event":"created","ts_ns":720297600,"id":419,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":720332000,"id":419,"name":"CommandAllocator 6"}
+{"event":"created","ts_ns":721070800,"id":420,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":2097152,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":721095200,"id":420,"name":"LinearAllocator Page"}
+{"event":"created","ts_ns":738434700,"id":421,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":739024300,"id":422,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":739048700,"id":422,"name":"CommandAllocator 7"}
+{"event":"created","ts_ns":739650200,"id":423,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":746698400,"id":424,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":2097152,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":746725500,"id":424,"name":"LinearAllocator Page"}
+{"event":"created","ts_ns":756523500,"id":425,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":756555300,"id":425,"name":"CommandAllocator 8"}
+{"event":"created","ts_ns":772960700,"id":426,"type":"Resource","alloc":"Committed","heap":"Upload","dim":"Buffer","format":0,"size":2097152,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":773006500,"id":426,"name":"LinearAllocator Page"}
+{"event":"created","ts_ns":776846200,"id":427,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"created","ts_ns":786609400,"id":428,"type":"CommandAllocator","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"renamed","ts_ns":786636000,"id":428,"name":"CommandAllocator 9"}
+{"event":"created","ts_ns":796690000,"id":429,"type":"DescriptorHeap","alloc":"None","heap":"None","dim":"Unknown","format":0,"size":0,"parent_heap_id":0,"name":""}
+{"event":"destroyed","ts_ns":6504003100,"id":296}
+{"event":"destroyed","ts_ns":6504236600,"id":295}
+{"event":"destroyed","ts_ns":6504478300,"id":299}
+{"event":"destroyed","ts_ns":6504735300,"id":298}
+{"event":"destroyed","ts_ns":6505023500,"id":302}
+{"event":"destroyed","ts_ns":6505282400,"id":301}
+{"event":"destroyed","ts_ns":6505557900,"id":306}
+{"event":"destroyed","ts_ns":6505823700,"id":304}
+{"event":"destroyed","ts_ns":6506201600,"id":315}
+{"event":"destroyed","ts_ns":6508094500,"id":316}
+{"event":"destroyed","ts_ns":6508367400,"id":317}
+{"event":"destroyed","ts_ns":6508689900,"id":318}
+{"event":"destroyed","ts_ns":6508960800,"id":319}
+{"event":"destroyed","ts_ns":6509241900,"id":320}
+{"event":"destroyed","ts_ns":6509498500,"id":321}
+{"event":"destroyed","ts_ns":6509774200,"id":322}
+{"event":"destroyed","ts_ns":6510052700,"id":323}
+{"event":"destroyed","ts_ns":6510326700,"id":324}
+{"event":"destroyed","ts_ns":6510603900,"id":325}
+{"event":"destroyed","ts_ns":6510883600,"id":326}
+{"event":"destroyed","ts_ns":6511166200,"id":327}
+{"event":"destroyed","ts_ns":6511426900,"id":328}
+{"event":"destroyed","ts_ns":6511634800,"id":329}
+{"event":"destroyed","ts_ns":6511853200,"id":330}
+{"event":"destroyed","ts_ns":6512075500,"id":331}
+{"event":"destroyed","ts_ns":6512312900,"id":332}
+{"event":"destroyed","ts_ns":6512526700,"id":333}
+{"event":"destroyed","ts_ns":6512961300,"id":334}
+{"event":"destroyed","ts_ns":6513289400,"id":335}
+{"event":"destroyed","ts_ns":6513579300,"id":337}
+{"event":"destroyed","ts_ns":6513810100,"id":338}
+{"event":"destroyed","ts_ns":6514049700,"id":339}
+{"event":"destroyed","ts_ns":6514295800,"id":340}
+{"event":"destroyed","ts_ns":6514624200,"id":341}
+{"event":"destroyed","ts_ns":6514908300,"id":342}
+{"event":"destroyed","ts_ns":6515123200,"id":343}
+{"event":"destroyed","ts_ns":6515321900,"id":344}
+{"event":"destroyed","ts_ns":6515562200,"id":345}
+{"event":"destroyed","ts_ns":6538223900,"id":346}
+{"event":"destroyed","ts_ns":6538496200,"id":347}
+{"event":"destroyed","ts_ns":6538799800,"id":348}
+{"event":"destroyed","ts_ns":6539049900,"id":349}
+{"event":"destroyed","ts_ns":6539244600,"id":350}
+{"event":"destroyed","ts_ns":6539401100,"id":351}
+{"event":"destroyed","ts_ns":6539552600,"id":352}
+{"event":"destroyed","ts_ns":6539743800,"id":353}
+{"event":"destroyed","ts_ns":6540007300,"id":354}
+{"event":"destroyed","ts_ns":6540230900,"id":355}
+{"event":"destroyed","ts_ns":6540427300,"id":356}
+{"event":"destroyed","ts_ns":6540594300,"id":358}
+{"event":"destroyed","ts_ns":6540771700,"id":360}
+{"event":"destroyed","ts_ns":6540944800,"id":362}
+{"event":"destroyed","ts_ns":6541103100,"id":363}
+{"event":"destroyed","ts_ns":6541252100,"id":364}
+{"event":"destroyed","ts_ns":6541403100,"id":365}
+{"event":"destroyed","ts_ns":6541551400,"id":366}
+{"event":"destroyed","ts_ns":6541743100,"id":367}
+{"event":"destroyed","ts_ns":6542003100,"id":368}
+{"event":"destroyed","ts_ns":6542208200,"id":369}
+{"event":"destroyed","ts_ns":6542386600,"id":290}
+{"event":"destroyed","ts_ns":6542547300,"id":289}
+{"event":"destroyed","ts_ns":6543087900,"id":285}
+{"event":"destroyed","ts_ns":6543322700,"id":286}
+{"event":"destroyed","ts_ns":6543786700,"id":287}
+{"event":"destroyed","ts_ns":6543998100,"id":288}
+{"event":"destroyed","ts_ns":6544189500,"id":292}
+{"event":"destroyed","ts_ns":6544335900,"id":291}
+{"event":"destroyed","ts_ns":6544479700,"id":370}
+{"event":"destroyed","ts_ns":6544667000,"id":378}
+{"event":"destroyed","ts_ns":6544835500,"id":386}
+{"event":"destroyed","ts_ns":6544875900,"id":278}
+{"event":"destroyed","ts_ns":6544904900,"id":279}
+{"event":"destroyed","ts_ns":6556597800,"id":15}
+{"event":"destroyed","ts_ns":6556834400,"id":401}
+{"event":"destroyed","ts_ns":6557088400,"id":410}
+{"event":"destroyed","ts_ns":6557299900,"id":420}
+{"event":"destroyed","ts_ns":6557523400,"id":424}
+{"event":"destroyed","ts_ns":6557763100,"id":426}
+{"event":"destroyed","ts_ns":6557962000,"id":180}
+{"event":"destroyed","ts_ns":6557981200,"id":400}
+{"event":"destroyed","ts_ns":6557994400,"id":413}
+{"event":"destroyed","ts_ns":6558007500,"id":416}
+{"event":"destroyed","ts_ns":6558022800,"id":421}
+{"event":"destroyed","ts_ns":6558035400,"id":423}
+{"event":"destroyed","ts_ns":6558047800,"id":427}
+{"event":"destroyed","ts_ns":6558062000,"id":429}
+{"event":"destroyed","ts_ns":6558126200,"id":14}
+{"event":"destroyed","ts_ns":6558170500,"id":403}
+{"event":"destroyed","ts_ns":6558199400,"id":13}
+{"event":"destroyed","ts_ns":6558222100,"id":399}
+{"event":"destroyed","ts_ns":6558278000,"id":409}
+{"event":"destroyed","ts_ns":6558319900,"id":414}
+{"event":"destroyed","ts_ns":6558360500,"id":417}
+{"event":"destroyed","ts_ns":6558409900,"id":418}
+{"event":"destroyed","ts_ns":6558450700,"id":419}
+{"event":"destroyed","ts_ns":6558489500,"id":422}
+{"event":"destroyed","ts_ns":6558529800,"id":425}
+{"event":"destroyed","ts_ns":6558566300,"id":428}
+{"event":"destroyed","ts_ns":6558596900,"id":6}
+{"event":"destroyed","ts_ns":6558621700,"id":8}
+{"event":"destroyed","ts_ns":6559824000,"id":7}
+{"event":"destroyed","ts_ns":6559864900,"id":10}
+{"event":"destroyed","ts_ns":6560273300,"id":9}
+{"event":"destroyed","ts_ns":6560535500,"id":144}
+{"event":"destroyed","ts_ns":6560595700,"id":145}
+{"event":"destroyed","ts_ns":6560634100,"id":313}
+{"event":"destroyed","ts_ns":6560661400,"id":276}
+{"event":"destroyed","ts_ns":6560699500,"id":58}
+{"event":"destroyed","ts_ns":6560735500,"id":272}
+{"event":"destroyed","ts_ns":6560763300,"id":221}
+{"event":"destroyed","ts_ns":6560792500,"id":130}
+{"event":"destroyed","ts_ns":6560820000,"id":131}
+{"event":"destroyed","ts_ns":6560843600,"id":269}
+{"event":"destroyed","ts_ns":6560872300,"id":139}
+{"event":"destroyed","ts_ns":6560905300,"id":277}
+{"event":"destroyed","ts_ns":6560933800,"id":51}
+{"event":"destroyed","ts_ns":6560962200,"id":137}
+{"event":"destroyed","ts_ns":6560985900,"id":271}
+{"event":"destroyed","ts_ns":6561014700,"id":54}
+{"event":"destroyed","ts_ns":6561044100,"id":138}
+{"event":"destroyed","ts_ns":6561072100,"id":53}
+{"event":"destroyed","ts_ns":6561100100,"id":56}
+{"event":"destroyed","ts_ns":6561129100,"id":275}
+{"event":"destroyed","ts_ns":6561153000,"id":274}
+{"event":"destroyed","ts_ns":6561177100,"id":218}
+{"event":"destroyed","ts_ns":6561202400,"id":311}
+{"event":"destroyed","ts_ns":6561230600,"id":223}
+{"event":"destroyed","ts_ns":6561256200,"id":310}
+{"event":"destroyed","ts_ns":6561290500,"id":43}
+{"event":"destroyed","ts_ns":6561317400,"id":57}
+{"event":"destroyed","ts_ns":6561344800,"id":220}
+{"event":"destroyed","ts_ns":6561372100,"id":55}
+{"event":"destroyed","ts_ns":6561395500,"id":308}
+{"event":"destroyed","ts_ns":6561432300,"id":312}
+{"event":"destroyed","ts_ns":6561463000,"id":273}
+{"event":"destroyed","ts_ns":6561491000,"id":243}
+{"event":"destroyed","ts_ns":6561658900,"id":309}
+{"event":"destroyed","ts_ns":6561695700,"id":224}
+{"event":"destroyed","ts_ns":6561730000,"id":219}
+{"event":"destroyed","ts_ns":6561758100,"id":59}
+{"event":"destroyed","ts_ns":6561785100,"id":132}
+{"event":"destroyed","ts_ns":6561817200,"id":242}
+{"event":"destroyed","ts_ns":6561850700,"id":270}
+{"event":"destroyed","ts_ns":6561884600,"id":52}
+{"event":"destroyed","ts_ns":6561915000,"id":153}
+{"event":"destroyed","ts_ns":6561943400,"id":162}
+{"event":"destroyed","ts_ns":6561972100,"id":188}
+{"event":"destroyed","ts_ns":6562000700,"id":156}
+{"event":"destroyed","ts_ns":6562028000,"id":160}
+{"event":"destroyed","ts_ns":6562056100,"id":38}
+{"event":"destroyed","ts_ns":6562084100,"id":203}
+{"event":"destroyed","ts_ns":6562112300,"id":239}
+{"event":"destroyed","ts_ns":6562139200,"id":42}
+{"event":"destroyed","ts_ns":6562169500,"id":32}
+{"event":"destroyed","ts_ns":6562197500,"id":28}
+{"event":"destroyed","ts_ns":6562225100,"id":283}
+{"event":"destroyed","ts_ns":6562253300,"id":192}
+{"event":"destroyed","ts_ns":6562280100,"id":193}
+{"event":"destroyed","ts_ns":6562309200,"id":185}
+{"event":"destroyed","ts_ns":6562335600,"id":238}
+{"event":"destroyed","ts_ns":6562360900,"id":189}
+{"event":"destroyed","ts_ns":6562388300,"id":231}
+{"event":"destroyed","ts_ns":6562416200,"id":209}
+{"event":"destroyed","ts_ns":6562574600,"id":200}
+{"event":"destroyed","ts_ns":6562612800,"id":281}
+{"event":"destroyed","ts_ns":6562640900,"id":230}
+{"event":"destroyed","ts_ns":6562668600,"id":173}
+{"event":"destroyed","ts_ns":6562696300,"id":33}
+{"event":"destroyed","ts_ns":6562724800,"id":182}
+{"event":"destroyed","ts_ns":6562750000,"id":199}
+{"event":"destroyed","ts_ns":6562777800,"id":39}
+{"event":"destroyed","ts_ns":6562807500,"id":234}
+{"event":"destroyed","ts_ns":6562833900,"id":241}
+{"event":"destroyed","ts_ns":6562861100,"id":41}
+{"event":"destroyed","ts_ns":6562888100,"id":134}
+{"event":"destroyed","ts_ns":6562914700,"id":208}
+{"event":"destroyed","ts_ns":6562943200,"id":136}
+{"event":"destroyed","ts_ns":6563009200,"id":284}
+{"event":"destroyed","ts_ns":6563051600,"id":152}
+{"event":"destroyed","ts_ns":6563079900,"id":159}
+{"event":"destroyed","ts_ns":6563105800,"id":233}
+{"event":"destroyed","ts_ns":6563134000,"id":141}
+{"event":"destroyed","ts_ns":6563160300,"id":151}
+{"event":"destroyed","ts_ns":6563188400,"id":35}
+{"event":"destroyed","ts_ns":6563215100,"id":175}
+{"event":"destroyed","ts_ns":6563243100,"id":155}
+{"event":"destroyed","ts_ns":6563269300,"id":161}
+{"event":"destroyed","ts_ns":6563296500,"id":165}
+{"event":"destroyed","ts_ns":6563326300,"id":27}
+{"event":"destroyed","ts_ns":6563353900,"id":181}
+{"event":"destroyed","ts_ns":6563380200,"id":207}
+{"event":"destroyed","ts_ns":6563525900,"id":143}
+{"event":"destroyed","ts_ns":6563552600,"id":198}
+{"event":"destroyed","ts_ns":6563579800,"id":163}
+{"event":"destroyed","ts_ns":6563607200,"id":214}
+{"event":"destroyed","ts_ns":6563632900,"id":40}
+{"event":"destroyed","ts_ns":6563658800,"id":166}
+{"event":"destroyed","ts_ns":6563686600,"id":196}
+{"event":"destroyed","ts_ns":6563713100,"id":172}
+{"event":"destroyed","ts_ns":6563751100,"id":213}
+{"event":"destroyed","ts_ns":6563777500,"id":216}
+{"event":"destroyed","ts_ns":6563804400,"id":235}
+{"event":"destroyed","ts_ns":6563832000,"id":202}
+{"event":"destroyed","ts_ns":6563859300,"id":164}
+{"event":"destroyed","ts_ns":6563885700,"id":147}
+{"event":"destroyed","ts_ns":6563911900,"id":227}
+{"event":"destroyed","ts_ns":6563936300,"id":157}
+{"event":"destroyed","ts_ns":6563964300,"id":31}
+{"event":"destroyed","ts_ns":6563988700,"id":154}
+{"event":"destroyed","ts_ns":6564016400,"id":30}
+{"event":"destroyed","ts_ns":6564041600,"id":240}
+{"event":"destroyed","ts_ns":6564068000,"id":201}
+{"event":"destroyed","ts_ns":6564094800,"id":228}
+{"event":"destroyed","ts_ns":6564120900,"id":171}
+{"event":"destroyed","ts_ns":6564261700,"id":191}
+{"event":"destroyed","ts_ns":6564290700,"id":184}
+{"event":"destroyed","ts_ns":6564317900,"id":148}
+{"event":"destroyed","ts_ns":6564344400,"id":282}
+{"event":"destroyed","ts_ns":6564372300,"id":29}
+{"event":"destroyed","ts_ns":6564398400,"id":236}
+{"event":"destroyed","ts_ns":6564424500,"id":212}
+{"event":"destroyed","ts_ns":6564450700,"id":211}
+{"event":"destroyed","ts_ns":6564477900,"id":133}
+{"event":"destroyed","ts_ns":6564505000,"id":177}
+{"event":"destroyed","ts_ns":6564531100,"id":226}
+{"event":"destroyed","ts_ns":6564557500,"id":237}
+{"event":"destroyed","ts_ns":6564584100,"id":167}
+{"event":"destroyed","ts_ns":6564609900,"id":37}
+{"event":"destroyed","ts_ns":6564636700,"id":36}
+{"event":"destroyed","ts_ns":6564663300,"id":146}
+{"event":"destroyed","ts_ns":6564689200,"id":229}
+{"event":"destroyed","ts_ns":6564715800,"id":204}
+{"event":"destroyed","ts_ns":6564742300,"id":215}
+{"event":"destroyed","ts_ns":6564769000,"id":158}
+{"event":"destroyed","ts_ns":6564796100,"id":187}
+{"event":"destroyed","ts_ns":6564822700,"id":183}
+{"event":"destroyed","ts_ns":6564964700,"id":195}
+{"event":"destroyed","ts_ns":6564994700,"id":194}
+{"event":"destroyed","ts_ns":6565022000,"id":140}
+{"event":"destroyed","ts_ns":6565048000,"id":197}
+{"event":"destroyed","ts_ns":6565074500,"id":174}
+{"event":"destroyed","ts_ns":6565102600,"id":135}
+{"event":"destroyed","ts_ns":6565131400,"id":176}
+{"event":"destroyed","ts_ns":6565156500,"id":149}
+{"event":"destroyed","ts_ns":6565186100,"id":142}
+{"event":"destroyed","ts_ns":6565212800,"id":210}
+{"event":"destroyed","ts_ns":6565240600,"id":232}
+{"event":"destroyed","ts_ns":6565267100,"id":190}
+{"event":"destroyed","ts_ns":6565300200,"id":225}
+{"event":"destroyed","ts_ns":6565328400,"id":280}
+{"event":"destroyed","ts_ns":6565357500,"id":268}
+{"event":"destroyed","ts_ns":6565384100,"id":206}
+{"event":"destroyed","ts_ns":6565411900,"id":34}
+{"event":"destroyed","ts_ns":6565437200,"id":50}
+{"event":"destroyed","ts_ns":6565463000,"id":222}
+{"event":"destroyed","ts_ns":6565489800,"id":150}
+{"event":"destroyed","ts_ns":6565516500,"id":170}
+{"event":"destroyed","ts_ns":6565673800,"id":186}
+{"event":"destroyed","ts_ns":6565702600,"id":217}
+{"event":"destroyed","ts_ns":6565728600,"id":26}
+{"event":"destroyed","ts_ns":6565738400,"id":11}
+{"event":"destroyed","ts_ns":6565746900,"id":16}
+{"event":"destroyed","ts_ns":6565754700,"id":49}
+{"event":"destroyed","ts_ns":6565764300,"id":70}
+{"event":"destroyed","ts_ns":6565775100,"id":336}
+{"event":"destroyed","ts_ns":6566000500,"id":12}
+{"event":"destroyed","ts_ns":6566259100,"id":17}
+{"event":"destroyed","ts_ns":6566485100,"id":18}
+{"event":"destroyed","ts_ns":6566642100,"id":19}
+{"event":"destroyed","ts_ns":6566834200,"id":20}
+{"event":"destroyed","ts_ns":6567037200,"id":21}
+{"event":"destroyed","ts_ns":6567189700,"id":22}
+{"event":"destroyed","ts_ns":6567220700,"id":23}
+{"event":"destroyed","ts_ns":6567244200,"id":24}
+{"event":"destroyed","ts_ns":6567386100,"id":25}
+{"event":"destroyed","ts_ns":6567565500,"id":69}
+{"event":"destroyed","ts_ns":6567745600,"id":60}
+{"event":"destroyed","ts_ns":6568312400,"id":61}
+{"event":"destroyed","ts_ns":6568604300,"id":62}
+{"event":"destroyed","ts_ns":6569015300,"id":397}
+{"event":"destroyed","ts_ns":6569361400,"id":398}
+{"event":"destroyed","ts_ns":6569722800,"id":63}
+{"event":"destroyed","ts_ns":6569990800,"id":91}
+{"event":"destroyed","ts_ns":6570207400,"id":71}
+{"event":"destroyed","ts_ns":6570432600,"id":64}
+{"event":"destroyed","ts_ns":6570648200,"id":65}
+{"event":"destroyed","ts_ns":6570804800,"id":66}
+{"event":"destroyed","ts_ns":6570963700,"id":67}
+{"event":"destroyed","ts_ns":6571114200,"id":68}
+{"event":"destroyed","ts_ns":6571311600,"id":72}
+{"event":"destroyed","ts_ns":6589137600,"id":73}
+{"event":"destroyed","ts_ns":6589386700,"id":74}
+{"event":"destroyed","ts_ns":6589577600,"id":75}
+{"event":"destroyed","ts_ns":6589843000,"id":76}
+{"event":"destroyed","ts_ns":6590115800,"id":77}
+{"event":"destroyed","ts_ns":6590305900,"id":78}
+{"event":"destroyed","ts_ns":6590498700,"id":79}
+{"event":"destroyed","ts_ns":6590734000,"id":80}
+{"event":"destroyed","ts_ns":6590937800,"id":81}
+{"event":"destroyed","ts_ns":6591094700,"id":82}
+{"event":"destroyed","ts_ns":6591259500,"id":83}
+{"event":"destroyed","ts_ns":6591409700,"id":84}
+{"event":"destroyed","ts_ns":6591597800,"id":85}
+{"event":"destroyed","ts_ns":6591794400,"id":86}
+{"event":"destroyed","ts_ns":6591951500,"id":87}
+{"event":"destroyed","ts_ns":6592098500,"id":88}
+{"event":"destroyed","ts_ns":6592261700,"id":89}
+{"event":"destroyed","ts_ns":6592408200,"id":90}
+{"event":"destroyed","ts_ns":6592579100,"id":92}
+{"event":"destroyed","ts_ns":6592753100,"id":93}
+{"event":"destroyed","ts_ns":6592979200,"id":94}
+{"event":"destroyed","ts_ns":6593254100,"id":95}
+{"event":"destroyed","ts_ns":6593463700,"id":96}
+{"event":"destroyed","ts_ns":6593684900,"id":97}
+{"event":"destroyed","ts_ns":6593834800,"id":98}
+{"event":"destroyed","ts_ns":6593969000,"id":99}
+{"event":"destroyed","ts_ns":6594095400,"id":101}
+{"event":"destroyed","ts_ns":6594222200,"id":100}
+{"event":"destroyed","ts_ns":6594349400,"id":103}
+{"event":"destroyed","ts_ns":6594502000,"id":102}
+{"event":"destroyed","ts_ns":6594718300,"id":105}
+{"event":"destroyed","ts_ns":6595010800,"id":104}
+{"event":"destroyed","ts_ns":6595446200,"id":110}
+{"event":"destroyed","ts_ns":6595676600,"id":111}
+{"event":"destroyed","ts_ns":6595914000,"id":106}
+{"event":"destroyed","ts_ns":6596194300,"id":107}
+{"event":"destroyed","ts_ns":6596431000,"id":108}
+{"event":"destroyed","ts_ns":6596689100,"id":109}
+{"event":"destroyed","ts_ns":6596894600,"id":114}
+{"event":"destroyed","ts_ns":6597051000,"id":115}
+{"event":"destroyed","ts_ns":6597202400,"id":116}
+{"event":"destroyed","ts_ns":6597350800,"id":117}
+{"event":"destroyed","ts_ns":6597510700,"id":118}
+{"event":"destroyed","ts_ns":6597658800,"id":119}
+{"event":"destroyed","ts_ns":6597805700,"id":120}
+{"event":"destroyed","ts_ns":6597950000,"id":121}
+{"event":"destroyed","ts_ns":6598099600,"id":122}
+{"event":"destroyed","ts_ns":6598246500,"id":123}
+{"event":"destroyed","ts_ns":6598392000,"id":113}
+{"event":"destroyed","ts_ns":6598537700,"id":112}
+{"event":"destroyed","ts_ns":6598688400,"id":124}
+{"event":"destroyed","ts_ns":6598850400,"id":125}
+{"event":"destroyed","ts_ns":6599919700,"id":126}
+{"event":"destroyed","ts_ns":6600210600,"id":169}
+{"event":"destroyed","ts_ns":6600428000,"id":168}
+{"event":"destroyed","ts_ns":6600587400,"id":178}
+{"event":"destroyed","ts_ns":6600738500,"id":179}
+{"event":"destroyed","ts_ns":6600890200,"id":205}
+{"event":"destroyed","ts_ns":6601103300,"id":402}
+{"event":"destroyed","ts_ns":6601286700,"id":377}
+{"event":"destroyed","ts_ns":6601436700,"id":372}
+{"event":"destroyed","ts_ns":6601583200,"id":371}
+{"event":"destroyed","ts_ns":6601727900,"id":376}
+{"event":"destroyed","ts_ns":6601872400,"id":375}
+{"event":"destroyed","ts_ns":6602045300,"id":374}
+{"event":"destroyed","ts_ns":6602269700,"id":373}
+{"event":"destroyed","ts_ns":6602435000,"id":385}
+{"event":"destroyed","ts_ns":6602584400,"id":380}
+{"event":"destroyed","ts_ns":6602732700,"id":379}
+{"event":"destroyed","ts_ns":6603006000,"id":384}
+{"event":"destroyed","ts_ns":6603299500,"id":383}
+{"event":"destroyed","ts_ns":6603545300,"id":382}
+{"event":"destroyed","ts_ns":6603793400,"id":381}
+{"event":"destroyed","ts_ns":6604032700,"id":393}
+{"event":"destroyed","ts_ns":6604223200,"id":388}
+{"event":"destroyed","ts_ns":6604385400,"id":387}
+{"event":"destroyed","ts_ns":6604607900,"id":392}
+{"event":"destroyed","ts_ns":6605044000,"id":391}
+{"event":"destroyed","ts_ns":6605292000,"id":390}
+{"event":"destroyed","ts_ns":6605505400,"id":389}
+{"event":"destroyed","ts_ns":6605745000,"id":247}
+{"event":"destroyed","ts_ns":6605986800,"id":246}
+{"event":"destroyed","ts_ns":6606139000,"id":244}
+{"event":"destroyed","ts_ns":6606289100,"id":245}
+{"event":"destroyed","ts_ns":6606436100,"id":249}
+{"event":"destroyed","ts_ns":6606649500,"id":248}
+{"event":"destroyed","ts_ns":6606793200,"id":251}
+{"event":"destroyed","ts_ns":6606936200,"id":250}
+{"event":"destroyed","ts_ns":6607145100,"id":252}
+{"event":"destroyed","ts_ns":6607342900,"id":253}
+{"event":"destroyed","ts_ns":6607517500,"id":255}
+{"event":"destroyed","ts_ns":6607698900,"id":254}
+{"event":"destroyed","ts_ns":6607853900,"id":257}
+{"event":"destroyed","ts_ns":6608159900,"id":256}
+{"event":"destroyed","ts_ns":6608388300,"id":258}
+{"event":"destroyed","ts_ns":6608566900,"id":259}
+{"event":"destroyed","ts_ns":6608740200,"id":261}
+{"event":"destroyed","ts_ns":6608902000,"id":260}
+{"event":"destroyed","ts_ns":6609281800,"id":262}
+{"event":"destroyed","ts_ns":6609511800,"id":264}
+{"event":"destroyed","ts_ns":6609743100,"id":263}
+{"event":"destroyed","ts_ns":6609955400,"id":266}
+{"event":"destroyed","ts_ns":6610221300,"id":265}
+{"event":"destroyed","ts_ns":6610480800,"id":267}
+{"event":"destroyed","ts_ns":6610622000,"id":395}
+{"event":"destroyed","ts_ns":6610656100,"id":396}
+{"event":"destroyed","ts_ns":6619757700,"id":404}
+{"event":"destroyed","ts_ns":6619821400,"id":415}
+{"event":"destroyed","ts_ns":6619827500,"id":411}
+{"event":"destroyed","ts_ns":6619832400,"id":405}
+{"event":"destroyed","ts_ns":6620543500,"id":407}
+{"event":"destroyed","ts_ns":6620744200,"id":406}
+{"event":"destroyed","ts_ns":6620774000,"id":44}
+{"event":"destroyed","ts_ns":6620779200,"id":412}
+{"event":"destroyed","ts_ns":6620855500,"id":408}
+{"event":"destroyed","ts_ns":6620861700,"id":45}
+{"event":"destroyed","ts_ns":6621095500,"id":46}
+{"event":"destroyed","ts_ns":6622776600,"id":5}
+{"event":"destroyed","ts_ns":6623098900,"id":394}
+{"event":"goodbye","ts_ns":0,"exit_code":0}
