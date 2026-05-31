@@ -27,6 +27,9 @@ public:
 
     Trace& trace() { return trace_; }
 
+    // Load a different trace file (used by the Open button and file drag-drop).
+    void LoadFile(const std::string& path);
+
 private:
     void DrawMenuBar();
     void DrawTimeline();      // ImPlot memory-over-time graph(s) + cursor
@@ -46,6 +49,7 @@ private:
 
     void SetSelected(uint64_t ts);
     double SelectedSeconds() const;
+    void ResetAfterLoad();   // clear per-trace UI state after (re)loading
 
     // Multi-select dropdown over the distinct values in `sel` (value -> shown).
     void FilterCombo(const char* label, std::map<std::string, bool>& sel);
@@ -54,9 +58,10 @@ private:
 
     Trace        trace_;
     bool         loaded_      = false;
+    bool         need_prompt_ = false; // default file missing -> ask on first frame
     uint64_t     selected_ts_ = 0;
     PlotMode     mode_        = PlotMode::Total;
-    bool         live_tail_   = false;
+    bool         live_tail_   = true;
     bool         show_counts_ = false;
     bool         split_host_  = true; // Upload/Readback in a second graph
 

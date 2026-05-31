@@ -4,7 +4,9 @@
 
 #include <d3d11.h>
 #include <tchar.h>
-#include <cstdlib> // __argc / __argv
+#include <shellapi.h> // drag-and-drop
+#include <cstdlib>    // __argc / __argv
+#include <string>
 
 #include "imgui.h"
 #include "imgui_impl_win32.h"
@@ -23,6 +25,7 @@ ID3D11Device*           g_device      = nullptr;
 ID3D11DeviceContext*    g_context     = nullptr;
 IDXGISwapChain*         g_swapchain   = nullptr;
 ID3D11RenderTargetView* g_rtv         = nullptr;
+dx12track::App*         g_app         = nullptr; // for the WM_DROPFILES handler
 
 void CreateRenderTarget() {
     ID3D11Texture2D* back = nullptr;
@@ -82,6 +85,20 @@ LRESULT WINAPI WndProc(HWND hwnd, UINT msg, WPARAM wp, LPARAM lp) {
         case WM_SYSCOMMAND:
             if ((wp & 0xfff0) == SC_KEYMENU) return 0; // disable ALT app menu
             break;
+        case WM_DROPFILES: {
+            HDROP drop = (HDROP)wp;
+            wchar_t path[1024];
+            if (g_app && ::DragQueryFileW(drop, 0, path, 1024)) {
+                int n = ::WideCharToMultiByte(CP_UTF8, 0, path, -1, nullptr, 0, nullptr, nullptr);
+                if (n > 0) {
+                    std::string s((size_t)(n - 1), '\0');
+                    ::WideCharToMultiByte(CP_UTF8, 0, path, -1, s.data(), n, nullptr, nullptr);
+                    g_app->LoadFile(s);
+                }
+            }
+            ::DragFinish(drop);
+            return 0;
+        }
         case WM_DESTROY:
             ::PostQuitMessage(0);
             return 0;
@@ -129,6 +146,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE, LPSTR, int) {
 
     ::ShowWindow(hwnd, SW_SHOWDEFAULT);
     ::UpdateWindow(hwnd);
+    ::DragAcceptFiles(hwnd, TRUE); // accept .jsonl files dropped onto the window
 
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -140,6 +158,7 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE, LPSTR, int) {
     ImGui_ImplDX11_Init(g_device, g_context);
 
     dx12track::App app(path);
+    g_app = &app;
 
     bool layout_built = false;
     bool running = true;

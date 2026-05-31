@@ -6,6 +6,9 @@
 #include <cstdio>
 #include <cstring>
 
+#include <windows.h>
+#include <commdlg.h> // GetOpenFileNameW
+
 #include "imgui.h"
 #include "implot.h"
 
@@ -27,10 +30,36 @@ std::string ToLower(std::string_view s) {
     return r;
 }
 
+std::string Utf8(const wchar_t* w) {
+    int n = ::WideCharToMultiByte(CP_UTF8, 0, w, -1, nullptr, 0, nullptr, nullptr);
+    if (n <= 0) return {};
+    std::string s((size_t)(n - 1), '\0');
+    ::WideCharToMultiByte(CP_UTF8, 0, w, -1, s.data(), n, nullptr, nullptr);
+    return s;
+}
+
+// Native open-file dialog filtered to .jsonl. Returns false if cancelled.
+bool BrowseForFile(std::string& out) {
+    wchar_t buf[1024] = {};
+    OPENFILENAMEW ofn = {};
+    ofn.lStructSize = sizeof(ofn);
+    const ImGuiViewport* vp = ImGui::GetMainViewport();
+    ofn.hwndOwner   = vp ? (HWND)vp->PlatformHandleRaw : nullptr;
+    ofn.lpstrFilter = L"JSONL traces\0*.jsonl\0All files\0*.*\0";
+    ofn.lpstrFile   = buf;
+    ofn.nMaxFile    = (DWORD)std::size(buf);
+    ofn.lpstrTitle  = L"Open dx12track .jsonl";
+    ofn.Flags       = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
+    if (!::GetOpenFileNameW(&ofn)) return false;
+    out = Utf8(buf);
+    return true;
+}
+
 } // namespace
 
 App::App(std::string jsonl_path) {
     loaded_ = trace_.Load(jsonl_path);
+    need_prompt_ = !loaded_; // no file at the default path -> ask on first frame
 
     // Seed the column filters with the full set of values dx12track can emit,
     // so the dropdowns list every option even if the trace doesn't use them.
@@ -57,7 +86,31 @@ void App::SetSelected(uint64_t ts) {
     selected_ts_ = ts;
 }
 
+void App::ResetAfterLoad() {
+    resolver_.Clear();
+    picked_id_ = 0;
+    picked_frames_.clear();
+    picked_has_stack_ = false;
+    range_valid_ = false;
+    dragging_range_ = false;
+    xlink_valid_ = false;
+    first_frame_ = true; // re-snap cursor to the new trace's peak
+}
+
+void App::LoadFile(const std::string& path) {
+    loaded_ = trace_.Load(path);
+    ResetAfterLoad();
+}
+
 void App::Draw() {
+    // If the default file was missing, prompt for one on the first frame (the
+    // window/viewport exists by now, so the dialog has a valid owner).
+    if (need_prompt_) {
+        need_prompt_ = false;
+        std::string path;
+        if (BrowseForFile(path)) LoadFile(path);
+    }
+
     if (first_frame_) {
         // Default the cursor to peak memory — the sample log is a clean
         // shutdown (everything freed at the end), so the end is uninteresting.
@@ -98,10 +151,12 @@ void App::DrawMenuBar() {
     ImGui::TextWrapped("file: %s", trace_.path().c_str());
     if (ImGui::Button("Reload")) {
         loaded_ = trace_.Reload();
-        resolver_.Clear();
-        picked_id_ = 0;
-        picked_frames_.clear();
-        first_frame_ = true; // re-snap cursor to peak
+        ResetAfterLoad();
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Open...")) {
+        std::string path;
+        if (BrowseForFile(path)) LoadFile(path);
     }
     ImGui::SameLine();
     ImGui::Checkbox("Live tail", &live_tail_);
