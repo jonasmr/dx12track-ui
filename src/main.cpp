@@ -161,6 +161,10 @@ int WINAPI WinMain(HINSTANCE inst, HINSTANCE, LPSTR, int) {
     ImPlot::CreateContext();
     ImGuiIO& io = ImGui::GetIO();
     io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+    // We rebuild the dock layout programmatically every run, so don't persist
+    // it: a saved layout (after the user rearranges panels) can reload with
+    // two central nodes and trip an ImGui assert on startup.
+    io.IniFilename = nullptr;
     ImGui::StyleColorsDark();
     ImGui_ImplWin32_Init(hwnd);
     ImGui_ImplDX11_Init(g_device, g_context);
