@@ -1,0 +1,5 @@
+build/
+vcpkg_installed/
+*.user
+.vs/
+imgui.ini

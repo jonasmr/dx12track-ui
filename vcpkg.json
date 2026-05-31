@@ -1,0 +1,14 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg/master/scripts/vcpkg.schema.json",
+  "name": "dx12track-ui",
+  "version-string": "0.1.0",
+  "description": "Dear ImGui + ImPlot viewer for dx12track.jsonl resource-tracking logs.",
+  "dependencies": [
+    {
+      "name": "imgui",
+      "features": [ "dx11-binding", "win32-binding", "docking-experimental" ]
+    },
+    "implot",
+    "nlohmann-json"
+  ]
+}
