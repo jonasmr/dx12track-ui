@@ -20,7 +20,20 @@ namespace dx12track {
 // Heap-type buckets: 0 = none/unknown, then the D3D12_HEAP_TYPE order.
 constexpr int kHeapBuckets  = 6; // none, Default, Upload, Readback, Custom, GpuUpload
 // Allocation-kind buckets matching AllocationKind ordinals.
-constexpr int kAllocBuckets = 5; // None, Committed, Placed, Reserved, Heap
+constexpr int kAllocBuckets   = 5; // None, Committed, Placed, Reserved, Heap
+constexpr int kAllocNone      = 0;
+constexpr int kAllocCommitted = 1;
+constexpr int kAllocPlaced    = 2;
+constexpr int kAllocReserved  = 3;
+constexpr int kAllocHeap      = 4;
+
+// Allocation kinds that represent actual backing memory. Committed resources
+// and Heap objects own real memory; Placed resources alias into a heap (already
+// counted via that heap) and Reserved resources are virtual, so both are
+// excluded from memory totals/graphs.
+inline bool AllocCountsAsMemory(int alloc_bucket) {
+    return alloc_bucket == kAllocCommitted || alloc_bucket == kAllocHeap;
+}
 
 int HeapBucket(std::string_view heap);
 int AllocBucket(std::string_view alloc);

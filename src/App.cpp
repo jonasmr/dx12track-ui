@@ -462,9 +462,18 @@ void App::DrawSummary() {
         uint64_t grand = 0, grand_c = 0;
 
         for (int h = 1; h < kHeapBuckets; ++h) {
-            uint64_t row_bytes = 0, row_count = 0;
-            for (int a : kAllocCols) { row_bytes += m.bytes[h][a]; row_count += m.counts[h][a]; }
-            if (row_bytes == 0) continue; // hide empty heap types
+            // row_any: any bytes at all (controls row visibility, keeps showing
+            // Placed/Reserved). row_bytes/row_count: only counted memory, used
+            // for the row Total and grand total.
+            uint64_t row_any = 0, row_bytes = 0, row_count = 0;
+            for (int a : kAllocCols) {
+                row_any += m.bytes[h][a];
+                if (AllocCountsAsMemory(a)) {
+                    row_bytes  += m.bytes[h][a];
+                    row_count  += m.counts[h][a];
+                }
+            }
+            if (row_any == 0) continue; // hide heap types with no allocations
 
             ImGui::TableNextRow();
             ImGui::TableNextColumn();
@@ -634,7 +643,9 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
             !heap_show_[o.heap] || !dim_show_[o.dim]) continue;
         if (!flt.empty() && ToLower(o.name).find(flt) == std::string::npos) continue;
         rows.push_back(i);
-        total_size += o.size;
+        // Placed resources alias into a heap and Reserved are virtual, so they
+        // don't add to actual allocated memory.
+        if (AllocCountsAsMemory(o.alloc_bucket)) total_size += o.size;
     }
     ImGui::Text("%zu %s   %s", rows.size(), noun, FormatBytes(total_size).c_str());
 

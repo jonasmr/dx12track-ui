@@ -229,7 +229,9 @@ void Trace::IngestLine(std::string_view line) {
         live_index_[ref.id] = idx;
 
         ++cur_live_;
-        if (ref.size > 0) {
+        // Only count actual backing memory (Committed/Heap); Placed resources
+        // alias into a heap and Reserved resources are virtual.
+        if (ref.size > 0 && AllocCountsAsMemory(ref.alloc_bucket)) {
             cur_total_ += ref.size;
             cur_by_heap_[ref.heap_bucket]   += ref.size;
             cur_by_alloc_[ref.alloc_bucket] += ref.size;
@@ -242,7 +244,7 @@ void Trace::IngestLine(std::string_view line) {
         if (it == live_index_.end()) return; // unknown / double free
         Obj& o = objects_[it->second];
         o.destroyed_ns = ts;
-        if (o.size > 0) {
+        if (o.size > 0 && AllocCountsAsMemory(o.alloc_bucket)) {
             cur_total_ -= o.size;
             cur_by_heap_[o.heap_bucket]   -= o.size;
             cur_by_alloc_[o.alloc_bucket] -= o.size;
@@ -283,9 +285,11 @@ MemorySummary Trace::SummaryAt(uint64_t t) const {
         ++m.live_count;
         m.per_type[o.type]++;
         if (o.size > 0) {
+            // Keep the per-cell breakdown for all kinds (incl. Placed/Reserved),
+            // but only count actual backing memory in the totals.
             m.bytes [o.heap_bucket][o.alloc_bucket] += o.size;
             m.counts[o.heap_bucket][o.alloc_bucket] += 1;
-            m.total_bytes += o.size;
+            if (AllocCountsAsMemory(o.alloc_bucket)) m.total_bytes += o.size;
         }
     }
     return m;
