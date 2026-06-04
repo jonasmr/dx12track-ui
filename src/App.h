@@ -65,6 +65,7 @@ private:
     bool         live_tail_   = true;
     bool         show_counts_ = false;
     bool         split_host_  = true; // Upload/Readback in a second graph
+    bool         graph_follow_ = false; // keep the graph's right edge at "now"
 
     // Shared X-axis range so the split graphs pan/zoom together.
     double       xlink_min_   = 0.0;

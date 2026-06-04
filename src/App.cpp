@@ -255,6 +255,10 @@ void App::DrawTimeline() {
     ImGui::EndDisabled();
     if (!can_split && ImGui::IsItemHovered())
         ImGui::SetTooltip("Allocation-kind series can't be split by heap type");
+    ImGui::SameLine();
+    ImGui::Checkbox("Follow tail", &graph_follow_);
+    if (ImGui::IsItemHovered())
+        ImGui::SetTooltip("Show the last 100s and pin the cursor to the latest sample");
 
     // Escape clears the selected range.
     if ((range_valid_ || dragging_range_) && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
@@ -274,10 +278,19 @@ void App::DrawTimeline() {
     for (size_t i = 0; i < N; ++i)
         xs_[i] = NsToSeconds(samples[i].ts_ns, trace_.start_ns);
 
+    const double latest = NsToSeconds(trace_.end_ns, trace_.start_ns);
+    // Default X view: the whole capture, but at least 0..100s.
     if (!xlink_valid_) {
         xlink_min_ = 0.0;
-        xlink_max_ = (N && xs_[N - 1] > 0.0) ? xs_[N - 1] : 1.0;
+        xlink_max_ = std::max(100.0, latest);
         xlink_valid_ = true;
+    }
+    // Follow tail: show the last 100s (or 0..100 if shorter) and pin the cursor
+    // to the latest timestamp.
+    if (graph_follow_) {
+        if (latest > 100.0) { xlink_min_ = latest - 100.0; xlink_max_ = latest; }
+        else                { xlink_min_ = 0.0;            xlink_max_ = 100.0; }
+        SetSelected(trace_.end_ns);
     }
 
     if (split_host_ && can_split) {
@@ -336,8 +349,9 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
     ImPlot::SetupAxisFormat(ImAxis_Y1, ByteAxisFormatter);
     ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, ymax > 0.0 ? ymax * 1.03 : 1.0,
                             ImPlotCond_Always);
-    if (heap_filter != 0) // keep the two split graphs panning/zooming together
-        ImPlot::SetupAxisLinks(ImAxis_X1, &xlink_min_, &xlink_max_);
+    // Drive the X range from the shared link (default 0..max(100,total), and
+    // follow-tail/zoom); also keeps the two split graphs in sync.
+    ImPlot::SetupAxisLinks(ImAxis_X1, &xlink_min_, &xlink_max_);
     ImPlot::SetupLegend(ImPlotLocation_NorthWest);
 
     if (mode_ == PlotMode::ByHeap || mode_ == PlotMode::ByAlloc) {
