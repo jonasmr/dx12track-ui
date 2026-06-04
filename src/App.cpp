@@ -56,6 +56,29 @@ void WriteLastFile(const std::string& path) {
     if (f) f << path;
 }
 
+// Path of the persisted category-filter config.
+std::string MemoryConfigPath() {
+    std::error_code ec;
+    if (const char* base = std::getenv("LOCALAPPDATA"); base && *base) {
+        std::filesystem::path dir = std::filesystem::path(base) / "dx12track-ui";
+        std::filesystem::create_directories(dir, ec);
+        return (dir / "memory_config.txt").string();
+    }
+    return "dx12track-ui_memory_config.txt"; // fallback: current directory
+}
+
+std::string ReadMemoryConfig() {
+    std::ifstream f(MemoryConfigPath(), std::ios::binary);
+    if (!f) return {};
+    return std::string((std::istreambuf_iterator<char>(f)),
+                       std::istreambuf_iterator<char>());
+}
+
+void WriteMemoryConfig(const char* text) {
+    std::ofstream f(MemoryConfigPath(), std::ios::trunc | std::ios::binary);
+    if (f) f << text;
+}
+
 std::string Utf8(const wchar_t* w) {
     int n = ::WideCharToMultiByte(CP_UTF8, 0, w, -1, nullptr, 0, nullptr, nullptr);
     if (n <= 0) return {};
@@ -110,6 +133,11 @@ App::App(std::string jsonl_path) {
         heap_show_[v] = true;
     for (const char* v : {"Unknown", "Buffer", "Tex1D", "Tex2D", "Tex3D"})
         dim_show_[v] = true;
+
+    // Load the persisted category-filter config and build the tree.
+    std::string cfg = ReadMemoryConfig();
+    std::snprintf(config_buf_, sizeof config_buf_, "%s", cfg.c_str());
+    ApplyFilterConfig();
 }
 
 double App::SelectedSeconds() const {
@@ -129,12 +157,116 @@ void App::ResetAfterLoad() {
     range_valid_ = false;
     dragging_range_ = false;
     xlink_valid_ = false;
+    obj_cat_.clear();          // recategorize the new trace's objects
+    categorized_count_ = 0;
     first_frame_ = true; // re-snap cursor to the new trace's peak
 }
 
 void App::LoadFile(const std::string& path) {
     loaded_ = trace_.Load(path); // bumps trace generation -> Draw resets the view
     if (loaded_) WriteLastFile(trace_.path()); // remember for next launch
+}
+
+namespace {
+std::string TrimStr(const std::string& s) {
+    size_t a = s.find_first_not_of(" \t");
+    if (a == std::string::npos) return {};
+    size_t b = s.find_last_not_of(" \t");
+    return s.substr(a, b - a + 1);
+}
+} // namespace
+
+void App::ApplyFilterConfig() {
+    defs_.clear();
+    std::string text = config_buf_;
+    int cur = -1; // index into defs_ of the current definition
+    size_t pos = 0;
+    while (pos <= text.size()) {
+        size_t nl = text.find('\n', pos);
+        std::string line = text.substr(pos, nl == std::string::npos ? std::string::npos
+                                                                     : nl - pos);
+        pos = (nl == std::string::npos) ? text.size() + 1 : nl + 1;
+        if (!line.empty() && line.back() == '\r') line.pop_back();
+        std::string t = TrimStr(line);
+        if (t.empty()) continue;
+
+        size_t colon = t.find(':');
+        if (colon != std::string::npos) {
+            Definition d;
+            std::string pathstr = TrimStr(t.substr(0, colon));
+            for (size_t p = 0; p <= pathstr.size();) {
+                size_t s = pathstr.find('/', p);
+                std::string seg = TrimStr(
+                    pathstr.substr(p, s == std::string::npos ? std::string::npos : s - p));
+                if (!seg.empty()) d.path.push_back(seg);
+                if (s == std::string::npos) break;
+                p = s + 1;
+            }
+            std::string pat = TrimStr(t.substr(colon + 1));
+            if (!pat.empty()) d.patterns.push_back(ToLower(pat));
+            defs_.push_back(std::move(d));
+            cur = (int)defs_.size() - 1;
+        } else if (cur >= 0) {
+            defs_[cur].patterns.push_back(ToLower(t)); // continuation pattern
+        }
+    }
+    // Drop definitions with no path (e.g. a stray ": foo").
+    defs_.erase(std::remove_if(defs_.begin(), defs_.end(),
+                               [](const Definition& d) { return d.path.empty(); }),
+                defs_.end());
+
+    BuildCategoryTree();
+    obj_cat_.clear();          // force a full recategorize against the new rules
+    categorized_count_ = 0;
+}
+
+void App::BuildCategoryTree() {
+    tree_.clear();
+    def_leaf_.assign(defs_.size(), -1);
+    tree_.push_back(CatNode{}); // node 0 = root
+
+    auto child = [&](int parent, const std::string& name) -> int {
+        for (int c : tree_[parent].children)
+            if (tree_[c].name == name) return c;
+        CatNode n;
+        n.name = name;
+        n.parent = parent;
+        tree_.push_back(std::move(n));
+        int idx = (int)tree_.size() - 1;
+        tree_[parent].children.push_back(idx);
+        return idx;
+    };
+
+    for (size_t di = 0; di < defs_.size(); ++di) {
+        int node = 0;
+        for (const std::string& seg : defs_[di].path) node = child(node, seg);
+        tree_[node].leaf_def = (int)di;
+        def_leaf_[di] = node;
+    }
+    uncat_node_ = child(0, "(uncategorized)");
+}
+
+int App::Categorize(const Obj& o) const {
+    std::string lname = ToLower(o.name);
+    for (size_t di = 0; di < defs_.size(); ++di) {
+        for (const std::string& p : defs_[di].patterns) {
+            if (p == "*" || (!p.empty() && lname.find(p) != std::string::npos))
+                return (int)di;
+        }
+    }
+    return -1;
+}
+
+void App::EnsureCategorized() {
+    const auto& objs = trace_.objects();
+    if (categorized_count_ > objs.size()) { // trace shrank/reset
+        obj_cat_.clear();
+        categorized_count_ = 0;
+    }
+    if (obj_cat_.size() < objs.size()) obj_cat_.resize(objs.size(), -1);
+    for (size_t i = categorized_count_; i < objs.size(); ++i)
+        obj_cat_[i] = Categorize(objs[i]);
+    categorized_count_ = objs.size();
 }
 
 void App::Draw() {
@@ -161,9 +293,12 @@ void App::Draw() {
         first_frame_ = false;
     }
 
+    EnsureCategorized();
+
     DrawMenuBar();
     DrawTimeline();
     DrawSummary();
+    DrawFiltering();
     DrawAllocations();
 }
 
@@ -542,6 +677,34 @@ void App::DrawSummary() {
     ImGui::End();
 }
 
+void App::DrawFiltering() {
+    ImGui::Begin("Filtering");
+
+    ImGui::TextWrapped("Group allocations into a tree. One rule per block:");
+    ImGui::TextDisabled("path/to/node: pattern   (more patterns on following lines)");
+    ImGui::TextDisabled("'*' matches everything (put it last).");
+
+    if (ImGui::Button("Apply")) {
+        ApplyFilterConfig();
+        WriteMemoryConfig(config_buf_);
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Revert")) {
+        std::string cfg = ReadMemoryConfig();
+        std::snprintf(config_buf_, sizeof config_buf_, "%s", cfg.c_str());
+        ApplyFilterConfig();
+    }
+    ImGui::SameLine();
+    size_t npat = 0;
+    for (const Definition& d : defs_) npat += d.patterns.size();
+    ImGui::TextDisabled("%zu categories, %zu patterns", defs_.size(), npat);
+
+    ImGui::InputTextMultiline("##cfg", config_buf_, sizeof config_buf_,
+                              ImVec2(-1, -1));
+
+    ImGui::End();
+}
+
 void App::FilterCombo(const char* label, std::map<std::string, bool>& sel) {
     int on = 0;
     for (auto& [k, v] : sel) if (v) ++on;
@@ -589,6 +752,7 @@ void App::DrawAllocations() {
     ImGui::SameLine(); FilterCombo("Alloc", alloc_show_);
     ImGui::SameLine(); FilterCombo("Heap", heap_show_);
     ImGui::SameLine(); FilterCombo("Dim", dim_show_);
+    ImGui::SameLine(); ImGui::Checkbox("Tree view", &show_tree_);
 
     const uint64_t s0 = trace_.start_ns;
     if (range_valid_) {
@@ -640,6 +804,64 @@ void App::DrawAllocations() {
     ImGui::End();
 }
 
+// Render one allocation as a 9-column table row (shared by flat + tree views).
+void App::DrawAllocRow(const Obj& o, uint64_t ref_t) {
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    // Whole-row selectable: clicking resolves this object's stack.
+    char idbuf[32];
+    std::snprintf(idbuf, sizeof idbuf, "%llu", (unsigned long long)o.id);
+    if (ImGui::Selectable(idbuf, picked_id_ == o.id,
+                          ImGuiSelectableFlags_SpanAllColumns)) {
+        picked_id_ = o.id;
+        picked_label_ = std::string(idbuf) + "  " + (o.name.empty() ? o.type : o.name);
+        picked_has_stack_ = !o.stack.empty();
+        picked_frames_ = resolver_.Resolve(o.stack, trace_);
+    }
+    ImGui::TableNextColumn(); ImGui::TextUnformatted(o.type.c_str());
+    ImGui::TableNextColumn(); ImGui::TextUnformatted(o.alloc.c_str());
+    ImGui::TableNextColumn(); ImGui::TextUnformatted(o.heap.c_str());
+    ImGui::TableNextColumn(); ImGui::TextUnformatted(o.dim.c_str());
+    ImGui::TableNextColumn(); ImGui::Text("%u", o.format);
+    ImGui::TableNextColumn();
+    if (o.size) ImGui::TextUnformatted(FormatBytes(o.size).c_str());
+    else        ImGui::TextUnformatted("-");
+    ImGui::TableNextColumn();
+    uint64_t age = ref_t >= o.created_ns ? ref_t - o.created_ns : 0;
+    ImGui::TextUnformatted(FormatNs(age).c_str());
+    ImGui::TableNextColumn();
+    ImGui::TextUnformatted(o.name.empty() ? "(unnamed)" : o.name.c_str());
+}
+
+void App::DrawCategoryNode(int node, uint64_t ref_t,
+                           const std::function<bool(size_t, size_t)>& less) {
+    CatNode& n = tree_[node];
+    if (n.count == 0) return; // hide categories with nothing in them
+
+    ImGui::TableNextRow();
+    ImGui::TableNextColumn();
+    // Stable ID from the node index; size/count go in the (formatted) label.
+    bool open = ImGui::TreeNodeEx(
+        (void*)(intptr_t)node,
+        ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_DefaultOpen,
+        "%s   %s  (%u)", n.name.c_str(), FormatBytes(n.size).c_str(), n.count);
+    if (!open) return;
+
+    // Children first (largest subtree first), then this node's own allocations.
+    std::vector<int> kids = n.children;
+    std::sort(kids.begin(), kids.end(),
+              [this](int a, int b) { return tree_[a].size > tree_[b].size; });
+    for (int c : kids) DrawCategoryNode(c, ref_t, less);
+
+    if (!n.objs.empty()) {
+        std::vector<size_t> mine = n.objs;
+        if (less) std::sort(mine.begin(), mine.end(), less);
+        const auto& objs = trace_.objects();
+        for (size_t idx : mine) DrawAllocRow(objs[idx], ref_t);
+    }
+    ImGui::TreePop();
+}
+
 void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
                          const std::function<bool(const Obj&)>& include) {
     const auto& objs = trace_.objects();
@@ -669,80 +891,80 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
 
     enum Col { C_Id, C_Type, C_Alloc, C_Heap, C_Dim, C_Format, C_Size, C_Age, C_Name };
 
-    if (ImGui::BeginTable(id, 9, tflags)) {
-        ImGui::TableSetupScrollFreeze(0, 1);
-        ImGui::TableSetupColumn("id",     ImGuiTableColumnFlags_WidthFixed |
-                                          ImGuiTableColumnFlags_DefaultSort, 0, C_Id);
-        ImGui::TableSetupColumn("type",   ImGuiTableColumnFlags_WidthFixed, 0, C_Type);
-        ImGui::TableSetupColumn("alloc",  ImGuiTableColumnFlags_WidthFixed, 0, C_Alloc);
-        ImGui::TableSetupColumn("heap",   ImGuiTableColumnFlags_WidthFixed, 0, C_Heap);
-        ImGui::TableSetupColumn("dim",    ImGuiTableColumnFlags_WidthFixed, 0, C_Dim);
-        ImGui::TableSetupColumn("format", ImGuiTableColumnFlags_WidthFixed, 0, C_Format);
-        ImGui::TableSetupColumn("size",   ImGuiTableColumnFlags_WidthFixed, 0, C_Size);
-        ImGui::TableSetupColumn("age",    ImGuiTableColumnFlags_WidthFixed, 0, C_Age);
-        ImGui::TableSetupColumn("name",   ImGuiTableColumnFlags_WidthStretch, 0, C_Name);
-        ImGui::TableHeadersRow();
+    if (!ImGui::BeginTable(id, 9, tflags)) return;
+    ImGui::TableSetupScrollFreeze(0, 1);
+    ImGui::TableSetupColumn("id",     ImGuiTableColumnFlags_WidthFixed |
+                                      ImGuiTableColumnFlags_DefaultSort, 0, C_Id);
+    ImGui::TableSetupColumn("type",   ImGuiTableColumnFlags_WidthFixed, 0, C_Type);
+    ImGui::TableSetupColumn("alloc",  ImGuiTableColumnFlags_WidthFixed, 0, C_Alloc);
+    ImGui::TableSetupColumn("heap",   ImGuiTableColumnFlags_WidthFixed, 0, C_Heap);
+    ImGui::TableSetupColumn("dim",    ImGuiTableColumnFlags_WidthFixed, 0, C_Dim);
+    ImGui::TableSetupColumn("format", ImGuiTableColumnFlags_WidthFixed, 0, C_Format);
+    ImGui::TableSetupColumn("size",   ImGuiTableColumnFlags_WidthFixed, 0, C_Size);
+    ImGui::TableSetupColumn("age",    ImGuiTableColumnFlags_WidthFixed, 0, C_Age);
+    ImGui::TableSetupColumn("name",   ImGuiTableColumnFlags_WidthStretch, 0, C_Name);
+    ImGui::TableHeadersRow();
 
-        if (ImGuiTableSortSpecs* ss = ImGui::TableGetSortSpecs();
-            ss && ss->SpecsCount > 0) {
-            const ImGuiTableColumnSortSpecs& s = ss->Specs[0];
-            const bool asc = s.SortDirection == ImGuiSortDirection_Ascending;
-            std::sort(rows.begin(), rows.end(), [&](size_t a, size_t b) {
-                const Obj& x = objs[a];
-                const Obj& y = objs[b];
-                int c = 0;
-                switch (s.ColumnUserID) {
-                    case C_Id:     c = (x.id < y.id) ? -1 : (x.id > y.id); break;
-                    case C_Type:   c = x.type.compare(y.type); break;
-                    case C_Alloc:  c = x.alloc.compare(y.alloc); break;
-                    case C_Heap:   c = x.heap.compare(y.heap); break;
-                    case C_Dim:    c = x.dim.compare(y.dim); break;
-                    case C_Format: c = (int)x.format - (int)y.format; break;
-                    case C_Size:   c = (x.size < y.size) ? -1 : (x.size > y.size); break;
-                    case C_Age:    c = (x.created_ns > y.created_ns) ? -1
-                                       : (x.created_ns < y.created_ns); break;
-                    case C_Name:   c = x.name.compare(y.name); break;
-                }
-                if (c == 0) c = (x.id < y.id) ? -1 : (x.id > y.id);
-                return asc ? c < 0 : c > 0;
-            });
+    // Build a sort comparator (by object index) from the table's sort specs.
+    std::function<bool(size_t, size_t)> less;
+    if (ImGuiTableSortSpecs* ss = ImGui::TableGetSortSpecs();
+        ss && ss->SpecsCount > 0) {
+        const int  col = ss->Specs[0].ColumnUserID;
+        const bool asc = ss->Specs[0].SortDirection == ImGuiSortDirection_Ascending;
+        less = [this, col, asc](size_t a, size_t b) {
+            const auto& os = trace_.objects();
+            const Obj& x = os[a];
+            const Obj& y = os[b];
+            int c = 0;
+            switch (col) {
+                case C_Id:     c = (x.id < y.id) ? -1 : (x.id > y.id); break;
+                case C_Type:   c = x.type.compare(y.type); break;
+                case C_Alloc:  c = x.alloc.compare(y.alloc); break;
+                case C_Heap:   c = x.heap.compare(y.heap); break;
+                case C_Dim:    c = x.dim.compare(y.dim); break;
+                case C_Format: c = (int)x.format - (int)y.format; break;
+                case C_Size:   c = (x.size < y.size) ? -1 : (x.size > y.size); break;
+                case C_Age:    c = (x.created_ns > y.created_ns) ? -1
+                                   : (x.created_ns < y.created_ns); break;
+                case C_Name:   c = x.name.compare(y.name); break;
+            }
+            if (c == 0) c = (x.id < y.id) ? -1 : (x.id > y.id);
+            return asc ? c < 0 : c > 0;
+        };
+    }
+
+    if (show_tree_) {
+        // Bucket the visible rows into their category leaves, then roll sizes up.
+        for (CatNode& n : tree_) { n.size = 0; n.count = 0; n.objs.clear(); }
+        for (size_t idx : rows) {
+            int cat = (idx < obj_cat_.size()) ? obj_cat_[idx] : -1;
+            int leaf = (cat >= 0 && cat < (int)def_leaf_.size()) ? def_leaf_[cat]
+                                                                 : uncat_node_;
+            if (leaf < 0 || leaf >= (int)tree_.size()) continue;
+            CatNode& n = tree_[leaf];
+            n.objs.push_back(idx);
+            n.count += 1;
+            if (AllocCountsAsMemory(objs[idx].alloc_bucket)) n.size += objs[idx].size;
         }
-
-        ImGuiListClipper clipper;
-        clipper.Begin((int)rows.size());
-        while (clipper.Step()) {
-            for (int r = clipper.DisplayStart; r < clipper.DisplayEnd; ++r) {
-                const Obj& o = objs[rows[r]];
-                ImGui::TableNextRow();
-                ImGui::TableNextColumn();
-                // Whole-row selectable: clicking resolves this object's stack.
-                char idbuf[32];
-                std::snprintf(idbuf, sizeof idbuf, "%llu", (unsigned long long)o.id);
-                if (ImGui::Selectable(idbuf, picked_id_ == o.id,
-                                      ImGuiSelectableFlags_SpanAllColumns)) {
-                    picked_id_ = o.id;
-                    picked_label_ = std::string(idbuf) + "  " +
-                                    (o.name.empty() ? o.type : o.name);
-                    picked_has_stack_ = !o.stack.empty();
-                    picked_frames_ = resolver_.Resolve(o.stack, trace_);
-                }
-                ImGui::TableNextColumn(); ImGui::TextUnformatted(o.type.c_str());
-                ImGui::TableNextColumn(); ImGui::TextUnformatted(o.alloc.c_str());
-                ImGui::TableNextColumn(); ImGui::TextUnformatted(o.heap.c_str());
-                ImGui::TableNextColumn(); ImGui::TextUnformatted(o.dim.c_str());
-                ImGui::TableNextColumn(); ImGui::Text("%u", o.format);
-                ImGui::TableNextColumn();
-                if (o.size) ImGui::TextUnformatted(FormatBytes(o.size).c_str());
-                else        ImGui::TextUnformatted("-");
-                ImGui::TableNextColumn();
-                uint64_t age = ref_t >= o.created_ns ? ref_t - o.created_ns : 0;
-                ImGui::TextUnformatted(FormatNs(age).c_str());
-                ImGui::TableNextColumn();
-                ImGui::TextUnformatted(o.name.empty() ? "(unnamed)" : o.name.c_str());
+        // Child node indices are always greater than their parent's, so a single
+        // high-to-low pass propagates each subtree's totals into its parent.
+        for (int i = (int)tree_.size() - 1; i >= 1; --i) {
+            const CatNode& n = tree_[i];
+            if (n.parent >= 0) {
+                tree_[n.parent].size  += n.size;
+                tree_[n.parent].count += n.count;
             }
         }
-        ImGui::EndTable();
+        for (int c : tree_[0].children) DrawCategoryNode(c, ref_t, less);
+    } else {
+        if (less) std::sort(rows.begin(), rows.end(), less);
+        ImGuiListClipper clipper;
+        clipper.Begin((int)rows.size());
+        while (clipper.Step())
+            for (int r = clipper.DisplayStart; r < clipper.DisplayEnd; ++r)
+                DrawAllocRow(objs[rows[r]], ref_t);
     }
+    ImGui::EndTable();
 }
 
 } // namespace dx12track
