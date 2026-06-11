@@ -1,6 +1,7 @@
 #include "SymbolResolver.h"
 
 #include <algorithm>
+#include <cctype>
 #include <cstdio>
 #include <filesystem>
 
@@ -63,6 +64,33 @@ std::string BaseName(const std::string& path) {
     return s == std::string::npos ? path : path.substr(s + 1);
 }
 
+// Serialize a PDB GUID the way the capture records it: lowercase 8-4-4-4-12,
+// e.g. "442672e8-70df-442a-a793-f04c91ff85e2".
+std::string GuidToString(const PDB::GUID& g) {
+    char buf[37];
+    std::snprintf(buf, sizeof buf,
+        "%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+        g.Data1, g.Data2, g.Data3,
+        g.Data4[0], g.Data4[1], g.Data4[2], g.Data4[3],
+        g.Data4[4], g.Data4[5], g.Data4[6], g.Data4[7]);
+    return buf;
+}
+
+// Recorded GUIDs may carry surrounding braces; strip them for comparison.
+std::string StripBraces(std::string s) {
+    if (s.size() >= 2 && s.front() == '{' && s.back() == '}')
+        s = s.substr(1, s.size() - 2);
+    return s;
+}
+
+bool IEquals(const std::string& a, const std::string& b) {
+    if (a.size() != b.size()) return false;
+    for (size_t i = 0; i < a.size(); ++i)
+        if (std::tolower((unsigned char)a[i]) != std::tolower((unsigned char)b[i]))
+            return false;
+    return true;
+}
+
 // Locate a PDB for the module: prefer the recorded path, else look next to the
 // module image, else swap the image's extension for .pdb.
 std::string FindPdb(const Module& m) {
@@ -103,6 +131,28 @@ const SymbolResolver::ModuleSyms& SymbolResolver::GetOrLoad(const Module& m) {
     if (PDB::HasValidDBIStream(rawFile) != PDB::ErrorCode::Success) return ms;
 
     const PDB::InfoStream infoStream(rawFile);
+
+    // Reject a PDB that doesn't match the one present at capture time. The
+    // GUID+age uniquely identify a build; a same-named/same-path PDB from a
+    // later build resolves addresses to the wrong functions, which is worse
+    // than no symbols at all. Only enforce when the capture recorded a GUID.
+    if (!m.pdb_guid.empty()) {
+        const PDB::Header* hdr = infoStream.GetHeader();
+        const std::string disk_guid = hdr ? GuidToString(hdr->guid) : std::string();
+        const std::string want_guid = StripBraces(m.pdb_guid);
+        const bool guid_ok = hdr && IEquals(disk_guid, want_guid);
+        // age 0 means the capture didn't record one -> don't gate on it.
+        const bool age_ok  = hdr && (m.pdb_age == 0 || hdr->age == m.pdb_age);
+        if (!guid_ok || !age_ok) {
+            ms.mismatch  = true;
+            ms.want_guid = want_guid;
+            ms.disk_guid = disk_guid;
+            ms.want_age  = m.pdb_age;
+            ms.disk_age  = hdr ? hdr->age : 0;
+            return ms; // leave have_pdb=false -> frames fall back to module+rva
+        }
+    }
+
     if (infoStream.UsesDebugFastLink()) return ms; // /DEBUG:FASTLINK unsupported
 
     const PDB::DBIStream dbiStream = PDB::CreateDBIStream(rawFile);
@@ -186,6 +236,13 @@ std::vector<ResolvedFrame> SymbolResolver::Resolve(const std::vector<uint64_t>& 
         const uint32_t rva = (uint32_t)(addr - m->base);
 
         const ModuleSyms& ms = GetOrLoad(*m);
+        if (ms.mismatch) {
+            f.pdb_mismatch = true;
+            f.note = BaseName(ms.pdb_path) + ": on-disk PDB (guid " + ms.disk_guid +
+                     " age " + std::to_string(ms.disk_age) + ") doesn't match the "
+                     "capture (guid " + ms.want_guid + " age " +
+                     std::to_string(ms.want_age) + ")";
+        }
         if (ms.have_pdb) {
             // largest symbol whose rva <= target
             auto it = std::upper_bound(ms.syms.begin(), ms.syms.end(), rva,

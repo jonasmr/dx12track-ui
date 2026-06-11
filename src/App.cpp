@@ -348,6 +348,21 @@ void App::DrawMenuBar() {
         } else if (picked_frames_.empty()) {
             ImGui::TextDisabled("(empty)");
         } else {
+            // Warn once if any module's on-disk PDB was rejected as stale: those
+            // frames show module+offset rather than (wrong) symbols.
+            std::string mismatch_detail;
+            for (const ResolvedFrame& f : picked_frames_) {
+                if (f.pdb_mismatch && mismatch_detail.find(f.note) == std::string::npos) {
+                    if (!mismatch_detail.empty()) mismatch_detail += "\n";
+                    mismatch_detail += f.note;
+                }
+            }
+            if (!mismatch_detail.empty()) {
+                ImGui::TextColored(ImVec4(1, 0.6f, 0.2f, 1),
+                    "PDB mismatch: showing module+offset, not symbols.");
+                if (ImGui::IsItemHovered())
+                    ImGui::SetTooltip("%s", mismatch_detail.c_str());
+            }
             ImGui::BeginChild("stack", ImVec2(0, 0), ImGuiChildFlags_Borders);
             for (size_t i = 0; i < picked_frames_.size(); ++i) {
                 const ResolvedFrame& f = picked_frames_[i];
