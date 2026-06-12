@@ -132,6 +132,7 @@ void BuildDefaultLayout(ImGuiID root, const ImVec2& size) {
     ImGui::DockBuilderDockWindow("dx12track",          right_top);
     ImGui::DockBuilderDockWindow("Memory summary",     right_bottom);
     ImGui::DockBuilderDockWindow("Filtering",          right_bottom); // tab w/ summary
+    ImGui::DockBuilderDockWindow("Placed Resource Info", right_bottom); // tab w/ summary
     ImGui::DockBuilderFinish(root);
 }
 

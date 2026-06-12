@@ -13,6 +13,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace dx12track {
@@ -27,6 +28,11 @@ constexpr int kAllocPlaced    = 2;
 constexpr int kAllocReserved  = 3;
 constexpr int kAllocHeap      = 4;
 
+// Residency-priority buckets. 0 = Unset (the app never called
+// SetResidencyPriority on the object), then the D3D12_RESIDENCY_PRIORITY tiers.
+constexpr int kPrioBuckets = 7; // Unset, Minimum, Low, Normal, High, Maximum, Custom
+constexpr int kPrioUnset   = 0;
+
 // Allocation kinds that represent actual backing memory. Committed resources
 // and Heap objects own real memory; Placed resources alias into a heap (already
 // counted via that heap) and Reserved resources are virtual, so both are
@@ -37,8 +43,10 @@ inline bool AllocCountsAsMemory(int alloc_bucket) {
 
 int HeapBucket(std::string_view heap);
 int AllocBucket(std::string_view alloc);
+int PrioBucket(std::string_view priority_name);
 const char* HeapBucketName(int bucket);
 const char* AllocBucketName(int bucket);
+const char* PrioBucketName(int bucket);
 
 // A module loaded in the traced process (protocol 2+), used to map a stack
 // return address back to a binary + PDB for symbol resolution.
@@ -63,10 +71,14 @@ struct Obj {
     uint32_t    format         = 0;
     uint64_t    size           = 0;
     uint64_t    parent_heap_id = 0;
+    uint64_t    parent_heap_ptr = 0;        // raw IUnknown* of the parent heap (Placed)
     uint64_t    created_ns     = 0;
     uint64_t    destroyed_ns   = UINT64_MAX; // UINT64_MAX while still live
     int         heap_bucket    = 0;
     int         alloc_bucket   = 0;
+    int32_t     priority       = 0;          // raw D3D12_RESIDENCY_PRIORITY value
+    std::string priority_name  = "Unset";    // tier name, or "Unset" if never set
+    int         prio_bucket    = kPrioUnset; // PrioBucket(priority_name)
     std::vector<uint64_t> stack; // capture-time return addresses (optional)
 
     bool LiveAt(uint64_t t) const { return created_ns <= t && t < destroyed_ns; }
@@ -78,6 +90,7 @@ struct Sample {
     uint64_t total_bytes  = 0;
     uint64_t by_heap [kHeapBuckets]  = {};
     uint64_t by_alloc[kAllocBuckets] = {};
+    uint64_t by_prio [kPrioBuckets]  = {};
     uint32_t live_count   = 0;
 };
 
@@ -115,6 +128,8 @@ public:
     const std::vector<Module>& modules() const { return modules_; }
     // Module whose address range contains `addr`, or nullptr.
     const Module* ModuleForAddress(uint64_t addr) const;
+    // Object with this tracker id (live or destroyed), or nullptr.
+    const Obj* ObjectById(uint64_t id) const;
     uint64_t    peak_ts_ns()  const { return peak_ts_ns_; }
     uint64_t    peak_bytes()  const { return peak_bytes_; }
     const std::string& path() const { return path_; }
@@ -136,6 +151,10 @@ private:
     std::string         error_;
     std::vector<Obj>    objects_;
     std::unordered_map<uint64_t, size_t> live_index_; // id -> index while live
+    std::unordered_map<uint64_t, size_t> id_index_;   // id -> index, persistent
+    // residency_priority events that arrived before their object's `created`
+    // (loose cross-thread ordering); applied when the object shows up.
+    std::unordered_map<uint64_t, std::pair<int32_t, std::string>> pending_prio_;
     std::vector<Sample> samples_;
     std::vector<Module> modules_;
 
@@ -143,6 +162,7 @@ private:
     uint64_t cur_total_ = 0;
     uint64_t cur_by_heap_[kHeapBuckets]  = {};
     uint64_t cur_by_alloc_[kAllocBuckets] = {};
+    uint64_t cur_by_prio_[kPrioBuckets]  = {};
     uint32_t cur_live_  = 0;
     uint64_t peak_ts_ns_ = 0;
     uint64_t peak_bytes_ = 0;

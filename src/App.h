@@ -51,7 +51,12 @@ private:
     void DrawTimeline();      // ImPlot memory-over-time graph(s) + cursor
     void DrawSummary();       // grouped memory totals at the selected time
     void DrawFiltering();     // category-config text editor + Apply
+    void DrawPlacedInfo();    // placed-resource <-> heap cross-reference
     void DrawAllocations();   // tabbed object tables (active / range deltas)
+
+    // Select an object (table row or placed-info link): updates the callstack
+    // panel and the placed-info panel so both views stay in sync.
+    void SelectObject(const Obj& o);
 
     // One filtered, sortable object table inside a tab. `include` selects which
     // objects to list; `ref_t` is the time used for the age column; `noun` is
@@ -82,7 +87,7 @@ private:
     // Multi-select dropdown over the distinct values in `sel` (value -> shown).
     void FilterCombo(const char* label, std::map<std::string, bool>& sel);
 
-    enum class PlotMode { Total, ByHeap, ByAlloc };
+    enum class PlotMode { Total, ByHeap, ByAlloc, ByPriority };
 
     Trace        trace_;
     bool         loaded_      = false;
@@ -120,7 +125,7 @@ private:
     // Per-column value filters for the allocations table (value -> shown).
     // Seeded with the full set of values dx12track can emit (see EventTypes.h),
     // and topped up from the data; everything defaults to shown.
-    std::map<std::string, bool> type_show_, alloc_show_, heap_show_, dim_show_;
+    std::map<std::string, bool> type_show_, alloc_show_, heap_show_, dim_show_, prio_show_;
 
     // Scratch buffers reused across frames for ImPlot (avoids per-frame alloc).
     std::vector<double> xs_, ys_, lo_, hi_;

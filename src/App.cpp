@@ -33,6 +33,19 @@ std::string ToLower(std::string_view s) {
     return r;
 }
 
+// Color for a residency-priority tier (bucket index from PrioBucket).
+ImVec4 PriorityColor(int bucket) {
+    switch (bucket) {
+        case 1: return ImVec4(0.55f, 0.65f, 0.85f, 1.0f); // Minimum - blue-gray
+        case 2: return ImVec4(0.30f, 0.80f, 0.85f, 1.0f); // Low      - cyan
+        case 3: return ImVec4(0.40f, 0.80f, 0.40f, 1.0f); // Normal   - green
+        case 4: return ImVec4(0.95f, 0.65f, 0.25f, 1.0f); // High     - orange
+        case 5: return ImVec4(0.90f, 0.35f, 0.35f, 1.0f); // Maximum  - red
+        case 6: return ImVec4(0.85f, 0.45f, 0.90f, 1.0f); // Custom   - magenta
+        default: return ImVec4(0.55f, 0.55f, 0.55f, 1.0f); // Unset   - dim gray
+    }
+}
+
 // Path of the tiny settings file that remembers the last opened trace.
 std::string LastFileRecordPath() {
     std::error_code ec;
@@ -133,6 +146,8 @@ App::App(std::string jsonl_path) {
         heap_show_[v] = true;
     for (const char* v : {"Unknown", "Buffer", "Tex1D", "Tex2D", "Tex3D"})
         dim_show_[v] = true;
+    for (const char* v : {"Unset", "Minimum", "Low", "Normal", "High", "Maximum", "Custom"})
+        prio_show_[v] = true;
 
     // Load the persisted category-filter config and build the tree.
     std::string cfg = ReadMemoryConfig();
@@ -299,6 +314,7 @@ void App::Draw() {
     DrawTimeline();
     DrawSummary();
     DrawFiltering();
+    DrawPlacedInfo();
     DrawAllocations();
 }
 
@@ -392,14 +408,16 @@ void App::DrawTimeline() {
     ImGui::SameLine();
     ImGui::RadioButton("By alloc kind", (int*)&mode_, (int)PlotMode::ByAlloc);
     ImGui::SameLine();
+    ImGui::RadioButton("By priority", (int*)&mode_, (int)PlotMode::ByPriority);
+    ImGui::SameLine();
     if (ImGui::Button("Jump to peak")) SetSelected(trace_.peak_ts_ns());
     ImGui::SameLine();
     if (ImGui::Button("Jump to end")) SetSelected(trace_.end_ns);
     ImGui::SameLine();
 
     // Splitting is a heap-type partition, so it only applies to the heap-based
-    // views (Total / By heap), not the allocation-kind breakdown.
-    const bool can_split = (mode_ != PlotMode::ByAlloc);
+    // views (Total / By heap), not the allocation-kind or priority breakdowns.
+    const bool can_split = (mode_ != PlotMode::ByAlloc && mode_ != PlotMode::ByPriority);
     ImGui::BeginDisabled(!can_split);
     ImGui::Checkbox("Separate Upload/Readback graph", &split_host_);
     ImGui::EndDisabled();
@@ -488,6 +506,8 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
         uint64_t s = 0;
         if (mode_ == PlotMode::ByAlloc) {
             for (int b = 1; b < kAllocBuckets; ++b) s += samples[i].by_alloc[b];
+        } else if (mode_ == PlotMode::ByPriority) {
+            for (int b = 0; b < kPrioBuckets; ++b) s += samples[i].by_prio[b];
         } else {
             for (int b = 0; b < kHeapBuckets; ++b)
                 if (in_filter(b)) s += samples[i].by_heap[b];
@@ -504,26 +524,33 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
     ImPlot::SetupAxisLinks(ImAxis_X1, &xlink_min_, &xlink_max_);
     ImPlot::SetupLegend(ImPlotLocation_NorthWest);
 
-    if (mode_ == PlotMode::ByHeap || mode_ == PlotMode::ByAlloc) {
+    if (mode_ != PlotMode::Total) {
         const bool by_heap = (mode_ == PlotMode::ByHeap);
-        const int  last    = by_heap ? kHeapBuckets : kAllocBuckets;
+        const bool by_prio = (mode_ == PlotMode::ByPriority);
+        // Priority shows the Unset band (bucket 0) too; heap/alloc skip bucket 0.
+        const int  first   = by_prio ? 0 : 1;
+        const int  last    = by_heap ? kHeapBuckets
+                           : by_prio ? kPrioBuckets : kAllocBuckets;
         std::vector<double> baseline(N, 0.0);
         ImPlotSpec fill;
         fill.FillAlpha = 0.65f;
-        for (int b = 1; b < last; ++b) {
+        for (int b = first; b < last; ++b) {
             if (by_heap && !in_filter(b)) continue;
             lo_.resize(N);
             hi_.resize(N);
             bool any = false;
             for (size_t i = 0; i < N; ++i) {
-                uint64_t v = by_heap ? samples[i].by_heap[b] : samples[i].by_alloc[b];
+                uint64_t v = by_heap ? samples[i].by_heap[b]
+                           : by_prio ? samples[i].by_prio[b]
+                                     : samples[i].by_alloc[b];
                 lo_[i] = baseline[i];
                 hi_[i] = baseline[i] + (double)v;
                 baseline[i] = hi_[i];
                 if (v) any = true;
             }
             if (!any) continue; // don't clutter the legend with empty bands
-            const char* name = by_heap ? HeapBucketName(b) : AllocBucketName(b);
+            const char* name = by_heap ? HeapBucketName(b)
+                             : by_prio ? PrioBucketName(b) : AllocBucketName(b);
             ImPlot::PlotShaded(name, xs_.data(), lo_.data(), hi_.data(), (int)N, fill);
         }
     } else { // Total of the selected heap subset
@@ -720,6 +747,127 @@ void App::DrawFiltering() {
     ImGui::End();
 }
 
+// Placed-resource <-> heap cross-reference, keyed off the selected object.
+// Selecting a Placed resource shows the heap it aliases into; selecting a Heap
+// lists the placed resources living inside it. Both directions are clickable so
+// you can flip back and forth.
+void App::DrawPlacedInfo() {
+    ImGui::Begin("Placed Resource Info");
+
+    const Obj* sel = picked_id_ ? trace_.ObjectById(picked_id_) : nullptr;
+    if (!sel) {
+        ImGui::TextDisabled("Select a Placed resource or a Heap to see placement info.");
+        ImGui::TextDisabled("(click a row in the allocations table)");
+        ImGui::End();
+        return;
+    }
+
+    const uint64_t active_t = range_valid_ ? range_end_ : selected_ts_;
+    const uint64_t s0 = trace_.start_ns;
+
+    auto obj_line = [&](const char* prefix, const Obj& o) {
+        ImGui::Text("%s id %llu  %s", prefix, (unsigned long long)o.id,
+                    o.name.empty() ? "(unnamed)" : o.name.c_str());
+        ImGui::Text("    type %s  alloc %s  heap %s  dim %s  size %s",
+                    o.type.c_str(), o.alloc.c_str(), o.heap.c_str(), o.dim.c_str(),
+                    o.size ? FormatBytes(o.size).c_str() : "-");
+    };
+
+    if (sel->alloc_bucket == kAllocPlaced) {
+        // --- a Placed resource is selected: describe its parent heap ---
+        ImGui::SeparatorText("Selected placed resource");
+        obj_line("", *sel);
+
+        ImGui::SeparatorText("Backed by heap");
+        const Obj* heap = trace_.ObjectById(sel->parent_heap_id);
+        if (heap) {
+            obj_line("", *heap);
+            if (sel->parent_heap_ptr)
+                ImGui::Text("    heap ptr 0x%llx",
+                            (unsigned long long)sel->parent_heap_ptr);
+
+            // How much of the heap is occupied by placed resources right now.
+            uint64_t placed_bytes = 0, placed_count = 0;
+            for (const Obj& o : trace_.objects())
+                if (o.alloc_bucket == kAllocPlaced &&
+                    o.parent_heap_id == heap->id && o.LiveAt(active_t)) {
+                    placed_bytes += o.size;
+                    ++placed_count;
+                }
+            ImGui::Text("    placed inside (at t=%s): %llu resources, %s",
+                        FormatNs(active_t - s0).c_str(),
+                        (unsigned long long)placed_count,
+                        FormatBytes(placed_bytes).c_str());
+
+            if (ImGui::Button("Go to heap")) SelectObject(*heap);
+        } else {
+            ImGui::TextColored(ImVec4(1, 0.7f, 0.2f, 1),
+                "parent heap id %llu not found in this trace",
+                (unsigned long long)sel->parent_heap_id);
+            if (sel->parent_heap_ptr)
+                ImGui::Text("heap ptr 0x%llx", (unsigned long long)sel->parent_heap_ptr);
+        }
+    } else if (sel->type == "Heap") {
+        // --- a Heap is selected: list the placed resources living inside it ---
+        ImGui::SeparatorText("Selected heap");
+        obj_line("", *sel);
+
+        std::vector<size_t> kids;
+        uint64_t kids_bytes = 0;
+        const auto& objs = trace_.objects();
+        for (size_t i = 0; i < objs.size(); ++i)
+            if (objs[i].alloc_bucket == kAllocPlaced &&
+                objs[i].parent_heap_id == sel->id && objs[i].LiveAt(active_t)) {
+                kids.push_back(i);
+                kids_bytes += objs[i].size;
+            }
+
+        ImGui::SeparatorText("Placed resources inside (live at selected time)");
+        ImGui::Text("at t=%s : %zu resources, %s", FormatNs(active_t - s0).c_str(),
+                    kids.size(), FormatBytes(kids_bytes).c_str());
+
+        const ImGuiTableFlags tflags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
+                                       ImGuiTableFlags_ScrollY;
+        if (ImGui::BeginTable("placed_kids", 5, tflags)) {
+            ImGui::TableSetupScrollFreeze(0, 1);
+            ImGui::TableSetupColumn("id");
+            ImGui::TableSetupColumn("dim");
+            ImGui::TableSetupColumn("format");
+            ImGui::TableSetupColumn("size");
+            ImGui::TableSetupColumn("name");
+            ImGui::TableHeadersRow();
+            ImGuiListClipper clipper;
+            clipper.Begin((int)kids.size());
+            while (clipper.Step())
+                for (int r = clipper.DisplayStart; r < clipper.DisplayEnd; ++r) {
+                    const Obj& o = objs[kids[r]];
+                    ImGui::TableNextRow();
+                    ImGui::TableNextColumn();
+                    char idbuf[32];
+                    std::snprintf(idbuf, sizeof idbuf, "%llu", (unsigned long long)o.id);
+                    if (ImGui::Selectable(idbuf, picked_id_ == o.id,
+                                          ImGuiSelectableFlags_SpanAllColumns))
+                        SelectObject(o);
+                    ImGui::TableNextColumn(); ImGui::TextUnformatted(o.dim.c_str());
+                    ImGui::TableNextColumn(); ImGui::Text("%u", o.format);
+                    ImGui::TableNextColumn();
+                    ImGui::TextUnformatted(o.size ? FormatBytes(o.size).c_str() : "-");
+                    ImGui::TableNextColumn();
+                    ImGui::TextUnformatted(o.name.empty() ? "(unnamed)" : o.name.c_str());
+                }
+            ImGui::EndTable();
+        }
+    } else {
+        ImGui::SeparatorText("Selected object");
+        obj_line("", *sel);
+        ImGui::Spacing();
+        ImGui::TextDisabled("Not a Placed resource or a Heap — select one of those");
+        ImGui::TextDisabled("to cross-reference placed resources with their heaps.");
+    }
+
+    ImGui::End();
+}
+
 void App::FilterCombo(const char* label, std::map<std::string, bool>& sel) {
     int on = 0;
     for (auto& [k, v] : sel) if (v) ++on;
@@ -759,6 +907,7 @@ void App::DrawAllocations() {
         alloc_show_.try_emplace(o.alloc, true);
         heap_show_.try_emplace(o.heap, true);
         dim_show_.try_emplace(o.dim, true);
+        prio_show_.try_emplace(o.priority_name, true);
     }
 
     ImGui::SetNextItemWidth(160);
@@ -767,6 +916,7 @@ void App::DrawAllocations() {
     ImGui::SameLine(); FilterCombo("Alloc", alloc_show_);
     ImGui::SameLine(); FilterCombo("Heap", heap_show_);
     ImGui::SameLine(); FilterCombo("Dim", dim_show_);
+    ImGui::SameLine(); FilterCombo("Priority", prio_show_);
     ImGui::SameLine(); ImGui::Checkbox("Tree view", &show_tree_);
 
     const uint64_t s0 = trace_.start_ns;
@@ -819,7 +969,17 @@ void App::DrawAllocations() {
     ImGui::End();
 }
 
-// Render one allocation as a 9-column table row (shared by flat + tree views).
+// Select an object: resolves its callstack and drives the placed-info panel.
+void App::SelectObject(const Obj& o) {
+    char idbuf[32];
+    std::snprintf(idbuf, sizeof idbuf, "%llu", (unsigned long long)o.id);
+    picked_id_ = o.id;
+    picked_label_ = std::string(idbuf) + "  " + (o.name.empty() ? o.type : o.name);
+    picked_has_stack_ = !o.stack.empty();
+    picked_frames_ = resolver_.Resolve(o.stack, trace_);
+}
+
+// Render one allocation as a 10-column table row (shared by flat + tree views).
 void App::DrawAllocRow(const Obj& o, uint64_t ref_t) {
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
@@ -827,12 +987,8 @@ void App::DrawAllocRow(const Obj& o, uint64_t ref_t) {
     char idbuf[32];
     std::snprintf(idbuf, sizeof idbuf, "%llu", (unsigned long long)o.id);
     if (ImGui::Selectable(idbuf, picked_id_ == o.id,
-                          ImGuiSelectableFlags_SpanAllColumns)) {
-        picked_id_ = o.id;
-        picked_label_ = std::string(idbuf) + "  " + (o.name.empty() ? o.type : o.name);
-        picked_has_stack_ = !o.stack.empty();
-        picked_frames_ = resolver_.Resolve(o.stack, trace_);
-    }
+                          ImGuiSelectableFlags_SpanAllColumns))
+        SelectObject(o);
     ImGui::TableNextColumn(); ImGui::TextUnformatted(o.type.c_str());
     ImGui::TableNextColumn(); ImGui::TextUnformatted(o.alloc.c_str());
     ImGui::TableNextColumn(); ImGui::TextUnformatted(o.heap.c_str());
@@ -841,6 +997,10 @@ void App::DrawAllocRow(const Obj& o, uint64_t ref_t) {
     ImGui::TableNextColumn();
     if (o.size) ImGui::TextUnformatted(FormatBytes(o.size).c_str());
     else        ImGui::TextUnformatted("-");
+    ImGui::TableNextColumn();
+    ImGui::TextColored(PriorityColor(o.prio_bucket), "%s", o.priority_name.c_str());
+    if (o.prio_bucket == 6 /*Custom*/ && ImGui::IsItemHovered())
+        ImGui::SetTooltip("raw priority = %d (0x%X)", o.priority, (unsigned)o.priority);
     ImGui::TableNextColumn();
     uint64_t age = ref_t >= o.created_ns ? ref_t - o.created_ns : 0;
     ImGui::TextUnformatted(FormatNs(age).c_str());
@@ -891,7 +1051,8 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
         const Obj& o = objs[i];
         if (!include(o)) continue;
         if (!type_show_[o.type] || !alloc_show_[o.alloc] ||
-            !heap_show_[o.heap] || !dim_show_[o.dim]) continue;
+            !heap_show_[o.heap] || !dim_show_[o.dim] ||
+            !prio_show_[o.priority_name]) continue;
         if (!flt.empty() && ToLower(o.name).find(flt) == std::string::npos) continue;
         rows.push_back(i);
         // Placed resources alias into a heap and Reserved are virtual, so they
@@ -904,9 +1065,10 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
         ImGuiTableFlags_Sortable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SortTristate;
 
-    enum Col { C_Id, C_Type, C_Alloc, C_Heap, C_Dim, C_Format, C_Size, C_Age, C_Name };
+    enum Col { C_Id, C_Type, C_Alloc, C_Heap, C_Dim, C_Format, C_Size, C_Prio,
+               C_Age, C_Name };
 
-    if (!ImGui::BeginTable(id, 9, tflags)) return;
+    if (!ImGui::BeginTable(id, 10, tflags)) return;
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableSetupColumn("id",     ImGuiTableColumnFlags_WidthFixed |
                                       ImGuiTableColumnFlags_DefaultSort, 0, C_Id);
@@ -916,6 +1078,7 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
     ImGui::TableSetupColumn("dim",    ImGuiTableColumnFlags_WidthFixed, 0, C_Dim);
     ImGui::TableSetupColumn("format", ImGuiTableColumnFlags_WidthFixed, 0, C_Format);
     ImGui::TableSetupColumn("size",   ImGuiTableColumnFlags_WidthFixed, 0, C_Size);
+    ImGui::TableSetupColumn("priority", ImGuiTableColumnFlags_WidthFixed, 0, C_Prio);
     ImGui::TableSetupColumn("age",    ImGuiTableColumnFlags_WidthFixed, 0, C_Age);
     ImGui::TableSetupColumn("name",   ImGuiTableColumnFlags_WidthStretch, 0, C_Name);
     ImGui::TableHeadersRow();
@@ -939,6 +1102,7 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
                 case C_Dim:    c = x.dim.compare(y.dim); break;
                 case C_Format: c = (int)x.format - (int)y.format; break;
                 case C_Size:   c = (x.size < y.size) ? -1 : (x.size > y.size); break;
+                case C_Prio:   c = x.prio_bucket - y.prio_bucket; break;
                 case C_Age:    c = (x.created_ns > y.created_ns) ? -1
                                    : (x.created_ns < y.created_ns); break;
                 case C_Name:   c = x.name.compare(y.name); break;

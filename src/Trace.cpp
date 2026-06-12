@@ -34,6 +34,16 @@ int AllocBucket(std::string_view a) {
     return 0;
 }
 
+int PrioBucket(std::string_view p) {
+    if (p == "Minimum") return 1;
+    if (p == "Low")     return 2;
+    if (p == "Normal")  return 3;
+    if (p == "High")    return 4;
+    if (p == "Maximum") return 5;
+    if (p == "Custom")  return 6;
+    return kPrioUnset; // "" / "Unset" / anything unrecognized
+}
+
 const char* HeapBucketName(int b) {
     switch (b) {
         case 1: return "Default";
@@ -55,9 +65,23 @@ const char* AllocBucketName(int b) {
     }
 }
 
+const char* PrioBucketName(int b) {
+    switch (b) {
+        case 1: return "Minimum";
+        case 2: return "Low";
+        case 3: return "Normal";
+        case 4: return "High";
+        case 5: return "Maximum";
+        case 6: return "Custom";
+        default: return "Unset";
+    }
+}
+
 void Trace::ResetModelState() {
     objects_.clear();
     live_index_.clear();
+    id_index_.clear();
+    pending_prio_.clear();
     samples_.clear();
     modules_.clear();
     pid = 0;
@@ -70,6 +94,7 @@ void Trace::ResetModelState() {
     cur_total_ = cur_live_ = 0;
     for (auto& v : cur_by_heap_)  v = 0;
     for (auto& v : cur_by_alloc_) v = 0;
+    for (auto& v : cur_by_prio_)  v = 0;
     peak_ts_ns_ = peak_bytes_ = 0;
     have_start_ = false;
     ++generation_;
@@ -213,6 +238,7 @@ void Trace::IngestLine(std::string_view line) {
         o.format         = j.value("format", 0u);
         o.size           = j.value("size", (uint64_t)0);
         o.parent_heap_id = j.value("parent_heap_id", (uint64_t)0);
+        o.parent_heap_ptr = ParseHex(j.value("parent_heap_ptr", std::string()));
         o.created_ns     = ts;
         o.heap_bucket    = HeapBucket(o.heap);
         o.alloc_bucket   = AllocBucket(o.alloc);
@@ -225,8 +251,17 @@ void Trace::IngestLine(std::string_view line) {
 
         size_t idx = objects_.size();
         objects_.push_back(std::move(o));
-        const Obj& ref = objects_[idx];
+        Obj& ref = objects_[idx];
         live_index_[ref.id] = idx;
+        id_index_[ref.id]   = idx;
+
+        // A residency_priority event may have arrived before this `created`.
+        if (auto pit = pending_prio_.find(ref.id); pit != pending_prio_.end()) {
+            ref.priority      = pit->second.first;
+            ref.priority_name = pit->second.second;
+            ref.prio_bucket   = PrioBucket(ref.priority_name);
+            pending_prio_.erase(pit);
+        }
 
         ++cur_live_;
         // Only count actual backing memory (Committed/Heap); Placed resources
@@ -235,6 +270,7 @@ void Trace::IngestLine(std::string_view line) {
             cur_total_ += ref.size;
             cur_by_heap_[ref.heap_bucket]   += ref.size;
             cur_by_alloc_[ref.alloc_bucket] += ref.size;
+            cur_by_prio_[ref.prio_bucket]   += ref.size;
         }
         if (cur_total_ > peak_bytes_) { peak_bytes_ = cur_total_; peak_ts_ns_ = ts; }
 
@@ -248,9 +284,39 @@ void Trace::IngestLine(std::string_view line) {
             cur_total_ -= o.size;
             cur_by_heap_[o.heap_bucket]   -= o.size;
             cur_by_alloc_[o.alloc_bucket] -= o.size;
+            cur_by_prio_[o.prio_bucket]   -= o.size;
         }
         if (cur_live_ > 0) --cur_live_;
         live_index_.erase(it);
+
+    } else if (ev == "residency_priority") {
+        uint64_t    id    = j.value("id", (uint64_t)0);
+        int32_t     prio  = j.value("priority", 0);
+        std::string pname = j.value("priority_name", std::string());
+        if (pname.empty()) pname = "Unset";
+        const int new_bucket = PrioBucket(pname);
+
+        // id == 0 means the pageable's vtable wasn't registered -> can't attribute.
+        if (id == 0) return;
+        auto it = id_index_.find(id);
+        if (it == id_index_.end()) {
+            // Arrived before the object's `created`; apply when it shows up.
+            pending_prio_[id] = {prio, pname};
+            return; // no sample yet
+        }
+        Obj& o = objects_[it->second];
+        const int old_bucket = o.prio_bucket;
+        o.priority      = prio;
+        o.priority_name = pname;
+        o.prio_bucket   = new_bucket;
+        // Shift its counted bytes between priority buckets (only while still live
+        // and memory-bearing; once destroyed the bytes are already removed).
+        if (old_bucket != new_bucket && o.destroyed_ns == UINT64_MAX &&
+            o.size > 0 && AllocCountsAsMemory(o.alloc_bucket)) {
+            cur_by_prio_[old_bucket] -= o.size;
+            cur_by_prio_[new_bucket] += o.size;
+        }
+        // fall through: the priority partition changed -> record a sample.
 
     } else if (ev == "renamed") {
         uint64_t id = j.value("id", (uint64_t)0);
@@ -269,6 +335,7 @@ void Trace::IngestLine(std::string_view line) {
     s.live_count  = cur_live_;
     for (int i = 0; i < kHeapBuckets;  ++i) s.by_heap[i]  = cur_by_heap_[i];
     for (int i = 0; i < kAllocBuckets; ++i) s.by_alloc[i] = cur_by_alloc_[i];
+    for (int i = 0; i < kPrioBuckets;  ++i) s.by_prio[i]  = cur_by_prio_[i];
     samples_.push_back(s);
 }
 
@@ -276,6 +343,11 @@ const Module* Trace::ModuleForAddress(uint64_t addr) const {
     for (const Module& m : modules_)
         if (m.Contains(addr)) return &m;
     return nullptr;
+}
+
+const Obj* Trace::ObjectById(uint64_t id) const {
+    auto it = id_index_.find(id);
+    return it == id_index_.end() ? nullptr : &objects_[it->second];
 }
 
 MemorySummary Trace::SummaryAt(uint64_t t) const {
