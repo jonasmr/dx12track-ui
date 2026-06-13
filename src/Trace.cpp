@@ -95,6 +95,7 @@ void Trace::ResetModelState() {
     for (auto& v : cur_by_heap_)  v = 0;
     for (auto& v : cur_by_alloc_) v = 0;
     for (auto& v : cur_by_prio_)  v = 0;
+    for (auto& v : cur_by_prio_dev_) v = 0;
     peak_ts_ns_ = peak_bytes_ = 0;
     have_start_ = false;
     ++generation_;
@@ -271,6 +272,8 @@ void Trace::IngestLine(std::string_view line) {
             cur_by_heap_[ref.heap_bucket]   += ref.size;
             cur_by_alloc_[ref.alloc_bucket] += ref.size;
             cur_by_prio_[ref.prio_bucket]   += ref.size;
+            if (!IsHostVisibleHeap(ref.heap_bucket))
+                cur_by_prio_dev_[ref.prio_bucket] += ref.size;
         }
         if (cur_total_ > peak_bytes_) { peak_bytes_ = cur_total_; peak_ts_ns_ = ts; }
 
@@ -285,6 +288,8 @@ void Trace::IngestLine(std::string_view line) {
             cur_by_heap_[o.heap_bucket]   -= o.size;
             cur_by_alloc_[o.alloc_bucket] -= o.size;
             cur_by_prio_[o.prio_bucket]   -= o.size;
+            if (!IsHostVisibleHeap(o.heap_bucket))
+                cur_by_prio_dev_[o.prio_bucket] -= o.size;
         }
         if (cur_live_ > 0) --cur_live_;
         live_index_.erase(it);
@@ -315,6 +320,10 @@ void Trace::IngestLine(std::string_view line) {
             o.size > 0 && AllocCountsAsMemory(o.alloc_bucket)) {
             cur_by_prio_[old_bucket] -= o.size;
             cur_by_prio_[new_bucket] += o.size;
+            if (!IsHostVisibleHeap(o.heap_bucket)) {
+                cur_by_prio_dev_[old_bucket] -= o.size;
+                cur_by_prio_dev_[new_bucket] += o.size;
+            }
         }
         // fall through: the priority partition changed -> record a sample.
 
@@ -336,6 +345,7 @@ void Trace::IngestLine(std::string_view line) {
     for (int i = 0; i < kHeapBuckets;  ++i) s.by_heap[i]  = cur_by_heap_[i];
     for (int i = 0; i < kAllocBuckets; ++i) s.by_alloc[i] = cur_by_alloc_[i];
     for (int i = 0; i < kPrioBuckets;  ++i) s.by_prio[i]  = cur_by_prio_[i];
+    for (int i = 0; i < kPrioBuckets;  ++i) s.by_prio_dev[i] = cur_by_prio_dev_[i];
     samples_.push_back(s);
 }
 

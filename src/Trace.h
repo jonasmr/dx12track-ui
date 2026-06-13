@@ -41,6 +41,13 @@ inline bool AllocCountsAsMemory(int alloc_bucket) {
     return alloc_bucket == kAllocCommitted || alloc_bucket == kAllocHeap;
 }
 
+// Upload/Readback (heap buckets 2 and 3) are the CPU-visible heaps; everything
+// else that counts as memory is device-local. Residency priority only matters
+// for device-local memory, so the by-priority graph separates the two.
+inline bool IsHostVisibleHeap(int heap_bucket) {
+    return heap_bucket == 2 || heap_bucket == 3;
+}
+
 int HeapBucket(std::string_view heap);
 int AllocBucket(std::string_view alloc);
 int PrioBucket(std::string_view priority_name);
@@ -90,7 +97,8 @@ struct Sample {
     uint64_t total_bytes  = 0;
     uint64_t by_heap [kHeapBuckets]  = {};
     uint64_t by_alloc[kAllocBuckets] = {};
-    uint64_t by_prio [kPrioBuckets]  = {};
+    uint64_t by_prio [kPrioBuckets]  = {}; // all counted memory, by priority
+    uint64_t by_prio_dev[kPrioBuckets] = {}; // device-local memory only, by priority
     uint32_t live_count   = 0;
 };
 
@@ -163,6 +171,7 @@ private:
     uint64_t cur_by_heap_[kHeapBuckets]  = {};
     uint64_t cur_by_alloc_[kAllocBuckets] = {};
     uint64_t cur_by_prio_[kPrioBuckets]  = {};
+    uint64_t cur_by_prio_dev_[kPrioBuckets] = {};
     uint32_t cur_live_  = 0;
     uint64_t peak_ts_ns_ = 0;
     uint64_t peak_bytes_ = 0;

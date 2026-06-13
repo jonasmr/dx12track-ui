@@ -415,9 +415,11 @@ void App::DrawTimeline() {
     if (ImGui::Button("Jump to end")) SetSelected(trace_.end_ns);
     ImGui::SameLine();
 
-    // Splitting is a heap-type partition, so it only applies to the heap-based
-    // views (Total / By heap), not the allocation-kind or priority breakdowns.
-    const bool can_split = (mode_ != PlotMode::ByAlloc && mode_ != PlotMode::ByPriority);
+    // Splitting is a heap-type partition. It applies to the heap-based views
+    // (Total / By heap) and to By priority (device-local shows the priority
+    // breakdown; host-visible falls back to heap type, since priority is
+    // irrelevant there). It does not apply to the allocation-kind breakdown.
+    const bool can_split = (mode_ != PlotMode::ByAlloc);
     ImGui::BeginDisabled(!can_split);
     ImGui::Checkbox("Separate Upload/Readback graph", &split_host_);
     ImGui::EndDisabled();
@@ -499,16 +501,30 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
         return true;                        // all
     };
 
+    // Per-panel "effective mode". In By-priority the host-visible panel
+    // (heap_filter==2) renders a heap-type breakdown instead, since residency
+    // priority is only meaningful for device-local memory.
+    const bool prio_as_heap   = (mode_ == PlotMode::ByPriority && heap_filter == 2);
+    const bool stacking_heap  = (mode_ == PlotMode::ByHeap) || prio_as_heap;
+    const bool stacking_prio  = (mode_ == PlotMode::ByPriority) && !prio_as_heap;
+    const bool stacking_alloc = (mode_ == PlotMode::ByAlloc);
+    // The device-local priority panel uses the device-only series; the unsplit
+    // priority view uses the all-memory series.
+    auto prio_src = [heap_filter](const Sample& s) -> const uint64_t* {
+        return (heap_filter == 1) ? s.by_prio_dev : s.by_prio;
+    };
+
     // Peak of whatever this panel will display, so we can leave headroom above
     // it (AutoFit pins the max flush against the top edge, hiding the peak).
     double ymax = 0.0;
     for (size_t i = 0; i < N; ++i) {
         uint64_t s = 0;
-        if (mode_ == PlotMode::ByAlloc) {
+        if (stacking_alloc) {
             for (int b = 1; b < kAllocBuckets; ++b) s += samples[i].by_alloc[b];
-        } else if (mode_ == PlotMode::ByPriority) {
-            for (int b = 0; b < kPrioBuckets; ++b) s += samples[i].by_prio[b];
-        } else {
+        } else if (stacking_prio) {
+            const uint64_t* src = prio_src(samples[i]);
+            for (int b = 0; b < kPrioBuckets; ++b) s += src[b];
+        } else { // stacking_heap or Total: heap subset
             for (int b = 0; b < kHeapBuckets; ++b)
                 if (in_filter(b)) s += samples[i].by_heap[b];
         }
@@ -525,32 +541,33 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
     ImPlot::SetupLegend(ImPlotLocation_NorthWest);
 
     if (mode_ != PlotMode::Total) {
-        const bool by_heap = (mode_ == PlotMode::ByHeap);
-        const bool by_prio = (mode_ == PlotMode::ByPriority);
         // Priority shows the Unset band (bucket 0) too; heap/alloc skip bucket 0.
-        const int  first   = by_prio ? 0 : 1;
-        const int  last    = by_heap ? kHeapBuckets
-                           : by_prio ? kPrioBuckets : kAllocBuckets;
+        const int first = stacking_prio ? 0 : 1;
+        const int last  = stacking_heap ? kHeapBuckets
+                        : stacking_prio ? kPrioBuckets : kAllocBuckets;
         std::vector<double> baseline(N, 0.0);
         ImPlotSpec fill;
-        fill.FillAlpha = 0.65f;
+        // Opaque fill: stacked bands don't overlap each other, and translucent
+        // fills accumulate alpha where samples are dense (or share timestamps),
+        // which painted bright vertical stripes over busy regions.
+        fill.FillAlpha = 1.0f;
         for (int b = first; b < last; ++b) {
-            if (by_heap && !in_filter(b)) continue;
+            if (stacking_heap && !in_filter(b)) continue;
             lo_.resize(N);
             hi_.resize(N);
             bool any = false;
             for (size_t i = 0; i < N; ++i) {
-                uint64_t v = by_heap ? samples[i].by_heap[b]
-                           : by_prio ? samples[i].by_prio[b]
-                                     : samples[i].by_alloc[b];
+                uint64_t v = stacking_heap ? samples[i].by_heap[b]
+                           : stacking_prio ? prio_src(samples[i])[b]
+                                           : samples[i].by_alloc[b];
                 lo_[i] = baseline[i];
                 hi_[i] = baseline[i] + (double)v;
                 baseline[i] = hi_[i];
                 if (v) any = true;
             }
             if (!any) continue; // don't clutter the legend with empty bands
-            const char* name = by_heap ? HeapBucketName(b)
-                             : by_prio ? PrioBucketName(b) : AllocBucketName(b);
+            const char* name = stacking_heap ? HeapBucketName(b)
+                             : stacking_prio ? PrioBucketName(b) : AllocBucketName(b);
             ImPlot::PlotShaded(name, xs_.data(), lo_.data(), hi_.data(), (int)N, fill);
         }
     } else { // Total of the selected heap subset
