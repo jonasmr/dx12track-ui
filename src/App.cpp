@@ -10,7 +10,9 @@
 #include <fstream>
 
 #include <windows.h>
-#include <commdlg.h> // GetOpenFileNameW
+#include <commdlg.h> // GetOpenFileNameW / GetSaveFileNameW
+
+#include <nlohmann/json.hpp>
 
 #include "imgui.h"
 #include "implot.h"
@@ -257,6 +259,26 @@ bool BrowseForFile(std::string& out) {
     ofn.lpstrTitle  = L"Open dx12track .jsonl";
     ofn.Flags       = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
     if (!::GetOpenFileNameW(&ofn)) return false;
+    out = Utf8(buf);
+    return true;
+}
+
+// Native save-file dialog for .jsonl exports (prompts before overwriting).
+// `default_name` seeds the filename box. Returns false if cancelled.
+bool BrowseForSaveFile(const wchar_t* default_name, std::string& out) {
+    wchar_t buf[1024] = {};
+    ::lstrcpynW(buf, default_name, (int)std::size(buf));
+    OPENFILENAMEW ofn = {};
+    ofn.lStructSize = sizeof(ofn);
+    const ImGuiViewport* vp = ImGui::GetMainViewport();
+    ofn.hwndOwner   = vp ? (HWND)vp->PlatformHandleRaw : nullptr;
+    ofn.lpstrFilter = L"JSONL traces\0*.jsonl\0All files\0*.*\0";
+    ofn.lpstrFile   = buf;
+    ofn.nMaxFile    = (DWORD)std::size(buf);
+    ofn.lpstrTitle  = L"Save allocations as .jsonl";
+    ofn.lpstrDefExt = L"jsonl";
+    ofn.Flags       = OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST | OFN_NOCHANGEDIR;
+    if (!::GetSaveFileNameW(&ofn)) return false;
     out = Utf8(buf);
     return true;
 }
@@ -1225,6 +1247,27 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
     }
     ImGui::Text("%zu %s   %s", rows.size(), noun, FormatBytes(total_size).c_str());
 
+    // Export exactly this tab's filtered rows (independent of tree expansion or
+    // scroll position) as a .jsonl mini-trace.
+    ImGui::SameLine();
+    if (ImGui::SmallButton((std::string("Save...##") + id).c_str())) {
+        std::string path;
+        if (BrowseForSaveFile(L"allocations.jsonl", path)) {
+            std::string err;
+            if (SaveAllocations(path, rows, ref_t, err)) {
+                char buf[64];
+                std::snprintf(buf, sizeof buf, "saved %zu to ", rows.size());
+                save_status_ = buf + std::filesystem::u8path(path).filename().u8string();
+            } else {
+                save_status_ = "save failed: " + err;
+            }
+        }
+    }
+    if (!save_status_.empty()) {
+        ImGui::SameLine();
+        ImGui::TextDisabled("%s", save_status_.c_str());
+    }
+
     const ImGuiTableFlags tflags =
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
         ImGuiTableFlags_Sortable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SortTristate;
@@ -1308,6 +1351,126 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
                 DrawAllocRow(objs[rows[r]], ref_t);
     }
     ImGui::EndTable();
+}
+
+bool App::SaveAllocations(const std::string& path, const std::vector<size_t>& rows,
+                          uint64_t ref_t, std::string& err) {
+    using ojson = nlohmann::ordered_json; // keeps "event" first, like JsonLog.cpp
+    const auto& objs = trace_.objects();
+
+    std::ofstream f(std::filesystem::u8path(path), std::ios::binary | std::ios::trunc);
+    if (!f) {
+        err = "could not open " + path;
+        return false;
+    }
+
+    auto hex = [](uint64_t v) {
+        char buf[24];
+        std::snprintf(buf, sizeof buf, "0x%llx", (unsigned long long)v);
+        return std::string(buf);
+    };
+    // Replace (rather than throw on) invalid UTF-8, e.g. an ANSI argv path.
+    auto emit = [&f](const ojson& j) {
+        f << j.dump(-1, ' ', false, ojson::error_handler_t::replace) << '\n';
+    };
+    // Category-tree path of an object ("foo/bar/hest"), bucketed exactly like
+    // the tree view; unmatched objects land in "(uncategorized)".
+    auto category = [this](size_t idx) {
+        int cat = (idx < obj_cat_.size()) ? obj_cat_[idx] : -1;
+        int node = (cat >= 0 && cat < (int)def_leaf_.size()) ? def_leaf_[cat]
+                                                             : uncat_node_;
+        std::vector<const std::string*> segs;
+        while (node > 0 && node < (int)tree_.size()) {
+            segs.push_back(&tree_[node].name);
+            node = tree_[node].parent;
+        }
+        std::string s;
+        for (auto it = segs.rbegin(); it != segs.rend(); ++it) {
+            if (!s.empty()) s += '/';
+            s += **it;
+        }
+        return s;
+    };
+
+    // Header: enough for Trace::Load to accept the file, plus provenance.
+    ojson hello;
+    hello["event"]          = "hello";
+    hello["ts_ns"]          = trace_.start_ns;
+    hello["pid"]            = trace_.pid;
+    hello["protocol"]       = trace_.protocol;
+    hello["qpc_freq"]       = trace_.qpc_freq;
+    hello["exe"]            = trace_.exe;
+    hello["source"]         = trace_.path();
+    hello["snapshot_ts_ns"] = ref_t;
+    emit(hello);
+
+    // Modules, so the exported callstacks still resolve.
+    for (const Module& m : trace_.modules()) {
+        ojson j;
+        j["event"]     = "module_loaded";
+        j["ts_ns"]     = trace_.start_ns;
+        j["base"]      = hex(m.base);
+        j["size"]      = m.size;
+        j["timestamp"] = m.pe_timestamp;
+        j["pdb_age"]   = m.pdb_age;
+        j["pdb_guid"]  = m.pdb_guid;
+        j["name"]      = m.name;
+        j["pdb_name"]  = m.pdb_name;
+        emit(j);
+    }
+
+    // Objects in event order (creation time, then id).
+    std::vector<size_t> order;
+    order.reserve(rows.size());
+    for (size_t idx : rows)
+        if (idx < objs.size()) order.push_back(idx);
+    std::sort(order.begin(), order.end(), [&objs](size_t a, size_t b) {
+        const Obj& x = objs[a];
+        const Obj& y = objs[b];
+        if (x.created_ns != y.created_ns) return x.created_ns < y.created_ns;
+        return x.id < y.id;
+    });
+
+    for (size_t idx : order) {
+        const Obj& o = objs[idx];
+        ojson j; // key order mirrors JsonLog.cpp's `created` line
+        j["event"]          = "created";
+        j["ts_ns"]          = o.created_ns;
+        j["id"]             = o.id;
+        j["type"]           = o.type;
+        j["alloc"]          = o.alloc;
+        j["heap"]           = o.heap;
+        j["dim"]            = o.dim;
+        j["format"]         = o.format;
+        j["size"]           = o.size;
+        j["parent_heap_id"] = o.parent_heap_id;
+        if (o.parent_heap_ptr) j["parent_heap_ptr"] = hex(o.parent_heap_ptr);
+        j["name"]           = o.name; // current (post-rename) name
+        j["category"]       = category(idx);
+        if (!o.stack.empty()) {
+            ojson stack = ojson::array();
+            for (uint64_t a : o.stack) stack.push_back(hex(a));
+            j["stack"] = std::move(stack);
+        }
+        emit(j);
+
+        if (o.prio_bucket != kPrioUnset) {
+            ojson p;
+            p["event"]         = "residency_priority";
+            p["ts_ns"]         = o.created_ns;
+            p["id"]            = o.id;
+            p["priority"]      = o.priority; // raw value, as Trace parses it
+            p["priority_name"] = o.priority_name;
+            emit(p);
+        }
+    }
+
+    f.flush();
+    if (!f) {
+        err = "write error on " + path;
+        return false;
+    }
+    return true;
 }
 
 } // namespace dx12track

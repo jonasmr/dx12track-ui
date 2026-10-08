@@ -68,6 +68,12 @@ private:
     // Recursively render a category node and its allocations as table rows.
     void DrawCategoryNode(int node, uint64_t ref_t,
                           const std::function<bool(size_t, size_t)>& less);
+    // Export the objects at `rows` (indices into trace_.objects()) as a loadable
+    // mini-trace .jsonl: hello + modules + created/residency_priority per object,
+    // each tagged with its category-tree path. Returns false and sets `err` on
+    // failure. `ref_t` is recorded as the snapshot time.
+    bool SaveAllocations(const std::string& path, const std::vector<size_t>& rows,
+                         uint64_t ref_t, std::string& err);
 
     // --- category filtering ---
     void ApplyFilterConfig();   // parse config_buf_ -> defs_ + tree, recategorize
@@ -121,6 +127,7 @@ private:
 
     char         filter_[128] = {};
     bool         first_frame_ = true;
+    std::string  save_status_; // result of the last allocation-table Save...
 
     // Per-column value filters for the allocations table (value -> shown).
     // Seeded with the full set of values dx12track can emit (see EventTypes.h),
