@@ -347,7 +347,10 @@ double App::SelectedSeconds() const {
 }
 
 void App::SetSelected(uint64_t ts) {
-    ts = std::clamp(ts, trace_.start_ns, trace_.end_ns ? trace_.end_ns : trace_.start_ns);
+    // Clamp to the render-time end (main log and ETW sidecar), so the region
+    // where only sidecar data exists is selectable too.
+    const uint64_t end = trace_.view_end_ns();
+    ts = std::clamp(ts, trace_.start_ns, std::max(end, trace_.start_ns));
     selected_ts_ = ts;
 }
 
@@ -490,7 +493,7 @@ void App::Draw() {
     if (first_frame_) {
         // Default the cursor to peak memory — the sample log is a clean
         // shutdown (everything freed at the end), so the end is uninteresting.
-        SetSelected(trace_.peak_ts_ns() ? trace_.peak_ts_ns() : trace_.end_ns);
+        SetSelected(trace_.peak_ts_ns() ? trace_.peak_ts_ns() : trace_.view_end_ns());
         xlink_valid_ = false; // recompute the shared X range for the new data
         first_frame_ = false;
     }
@@ -515,7 +518,7 @@ void App::DrawMenuBar() {
 
     ImGui::Text("exe : %s", trace_.exe.empty() ? "(unknown)" : trace_.exe.c_str());
     ImGui::Text("pid : %u", trace_.pid);
-    ImGui::Text("uptime : %s", FormatNs(trace_.end_ns - trace_.start_ns).c_str());
+    ImGui::Text("uptime : %s", FormatNs(trace_.view_end_ns() - trace_.start_ns).c_str());
     ImGui::Text("events : %zu objects, %zu samples",
                 trace_.objects().size(), trace_.samples().size());
     ImGui::Text("peak : %s @ %s", FormatBytes(trace_.peak_bytes()).c_str(),
@@ -656,7 +659,7 @@ void App::DrawTimeline() {
     }
     if (ImGui::Button("Jump to peak")) SetSelected(trace_.peak_ts_ns());
     ImGui::SameLine();
-    if (ImGui::Button("Jump to end")) SetSelected(trace_.end_ns);
+    if (ImGui::Button("Jump to end")) SetSelected(trace_.view_end_ns());
     ImGui::SameLine();
 
     // Splitting is a heap-type partition. It applies to the heap-based views
@@ -698,6 +701,10 @@ void App::DrawTimeline() {
         return;
     }
 
+    // All graphs end at the latest timestamp across the main log and the ETW
+    // sidecar (render-time only: the model isn't extended, since delayed
+    // events can still arrive). The last value of each series holds until then.
+    const uint64_t view_end = trace_.view_end_ns();
     if (mode_ == PlotMode::ByLocation) {
         // The location series is a step function (value holds until the next
         // sample); duplicate each X so the shaded bands are drawn as stairs,
@@ -709,16 +716,20 @@ void App::DrawTimeline() {
             if (i > 0) xs_.push_back(x); // end of the previous step
             xs_.push_back(x);
         }
-        if (!ls.empty() && trace_.end_ns > ls.back().ts_ns)
-            xs_.push_back(NsToSeconds(trace_.end_ns, trace_.start_ns));
+        if (!ls.empty() && view_end > ls.back().ts_ns)
+            xs_.push_back(NsToSeconds(view_end, trace_.start_ns));
     } else {
+        // One point per sample, plus a final point at the view end holding the
+        // last sample's values (DrawTimelinePanel maps it back to that sample).
         const size_t N = samples.size();
         xs_.resize(N);
         for (size_t i = 0; i < N; ++i)
             xs_[i] = NsToSeconds(samples[i].ts_ns, trace_.start_ns);
+        if (view_end > samples.back().ts_ns)
+            xs_.push_back(NsToSeconds(view_end, trace_.start_ns));
     }
 
-    const double latest = NsToSeconds(trace_.end_ns, trace_.start_ns);
+    const double latest = NsToSeconds(view_end, trace_.start_ns);
     // Default X view: the whole capture, but at least 0..100s.
     if (!xlink_valid_) {
         xlink_min_ = 0.0;
@@ -730,7 +741,7 @@ void App::DrawTimeline() {
     if (graph_follow_) {
         if (latest > 100.0) { xlink_min_ = latest - 100.0; xlink_max_ = latest; }
         else                { xlink_min_ = 0.0;            xlink_max_ = 100.0; }
-        SetSelected(trace_.end_ns);
+        SetSelected(view_end);
     }
 
     if (split_host_ && can_split) {
@@ -750,6 +761,9 @@ void App::DrawTimeline() {
 void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) {
     const auto& samples = trace_.samples();
     const size_t N = samples.size();
+    // Points drawn by the samples-based modes: xs_ may carry one extra point
+    // at the view end (see DrawTimeline), which repeats the last sample.
+    const size_t NP = std::min(xs_.size(), N + 1);
 
     // While Shift is held, free up the left mouse button (normally pan) so we
     // can use it for range selection; restore the mapping after EndPlot.
@@ -895,7 +909,7 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
         const int first = stacking_prio ? 0 : 1;
         const int last  = stacking_heap ? kHeapBuckets
                         : stacking_prio ? kPrioBuckets : kAllocBuckets;
-        std::vector<double> baseline(N, 0.0);
+        std::vector<double> baseline(NP, 0.0);
         ImPlotSpec fill;
         // Opaque fill: stacked bands don't overlap each other, and translucent
         // fills accumulate alpha where samples are dense (or share timestamps),
@@ -903,13 +917,14 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
         fill.FillAlpha = 1.0f;
         for (int b = first; b < last; ++b) {
             if (stacking_heap && !in_filter(b)) continue;
-            lo_.resize(N);
-            hi_.resize(N);
+            lo_.resize(NP);
+            hi_.resize(NP);
             bool any = false;
-            for (size_t i = 0; i < N; ++i) {
-                uint64_t v = stacking_heap ? samples[i].by_heap[b]
-                           : stacking_prio ? prio_src(samples[i])[b]
-                                           : samples[i].by_alloc[b];
+            for (size_t i = 0; i < NP; ++i) {
+                const Sample& smp = samples[std::min(i, N - 1)];
+                uint64_t v = stacking_heap ? smp.by_heap[b]
+                           : stacking_prio ? prio_src(smp)[b]
+                                           : smp.by_alloc[b];
                 lo_[i] = baseline[i];
                 hi_[i] = baseline[i] + (double)v;
                 baseline[i] = hi_[i];
@@ -918,14 +933,15 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
             if (!any) continue; // don't clutter the legend with empty bands
             const char* name = stacking_heap ? HeapBucketName(b)
                              : stacking_prio ? PrioBucketName(b) : AllocBucketName(b);
-            ImPlot::PlotShaded(name, xs_.data(), lo_.data(), hi_.data(), (int)N, fill);
+            ImPlot::PlotShaded(name, xs_.data(), lo_.data(), hi_.data(), (int)NP, fill);
         }
     } else { // Total of the selected heap subset
-        ys_.resize(N);
-        for (size_t i = 0; i < N; ++i) {
+        ys_.resize(NP);
+        for (size_t i = 0; i < NP; ++i) {
+            const Sample& smp = samples[std::min(i, N - 1)];
             uint64_t s = 0;
             for (int b = 0; b < kHeapBuckets; ++b)
-                if (in_filter(b)) s += samples[i].by_heap[b];
+                if (in_filter(b)) s += smp.by_heap[b];
             ys_[i] = (double)s;
         }
         const char* lbl = (heap_filter == 1) ? "Device-local"
@@ -933,8 +949,8 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
                                              : "Total";
         ImPlotSpec fill;
         fill.FillAlpha = 0.25f;
-        ImPlot::PlotShaded(lbl, xs_.data(), ys_.data(), (int)N, 0.0, fill);
-        ImPlot::PlotStairs(lbl, xs_.data(), ys_.data(), (int)N);
+        ImPlot::PlotShaded(lbl, xs_.data(), ys_.data(), (int)NP, 0.0, fill);
+        ImPlot::PlotStairs(lbl, xs_.data(), ys_.data(), (int)NP);
     }
 
     // Location overlay: counted memory per ETW location as unfilled stairs on
@@ -943,8 +959,9 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
     if (loc_lines && !lser.empty()) {
         lxs_.clear();
         for (const LocSample& s : lser) lxs_.push_back(NsToSeconds(s.ts_ns, trace_.start_ns));
-        const bool extend = trace_.end_ns > lser.back().ts_ns;
-        if (extend) lxs_.push_back(NsToSeconds(trace_.end_ns, trace_.start_ns));
+        const uint64_t view_end = trace_.view_end_ns();
+        const bool extend = view_end > lser.back().ts_ns;
+        if (extend) lxs_.push_back(NsToSeconds(view_end, trace_.start_ns));
         ImPlotSpec ls;
         ls.LineWeight = 2.0f;
         for (int b : kLineBuckets) {

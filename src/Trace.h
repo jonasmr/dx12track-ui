@@ -295,6 +295,16 @@ public:
     const EtwStats&    etw_stats() const { return etw_stats_; }
     const std::vector<EtwCounters>& etw_counters() const { return etw_counters_; } // by ts
     uint32_t           etw_diag_count() const { return etw_diag_count_; }
+    // Latest ts_ns of any ingested sidecar line (0 without one). Sidecar data
+    // (counters, location changes) keeps arriving after the main log goes quiet.
+    uint64_t           etw_end_ns() const { return has_etw() ? etw_end_ns_ : 0; }
+    // Render-time end of the trace: the latest timestamp across the main log and
+    // the sidecar. The model itself (end_ns, samples) is not extended, since
+    // delayed events can still arrive; the UI extends its graphs to this.
+    uint64_t view_end_ns() const {
+        const uint64_t e = etw_end_ns();
+        return e > end_ns ? e : end_ns;
+    }
     // Counted memory by location over time. Rebuilt lazily (only when the
     // main log or the sidecar changed since the last call).
     const std::vector<LocSample>& LocationSeries() const;
@@ -354,6 +364,7 @@ private:
     EtwStats    etw_stats_;
     std::vector<EtwCounters> etw_counters_;
     uint32_t    etw_diag_count_ = 0;
+    uint64_t    etw_end_ns_     = 0; // max ts_ns of the ingested sidecar lines
     // Sidecar info for ids whose `created` hasn't been read yet (the two files
     // are tailed independently); moved onto the object when it shows up.
     std::unordered_map<uint64_t, EtwObjInfo> pending_etw_;

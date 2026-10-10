@@ -194,6 +194,7 @@ void Trace::ResetEtwState(bool rewind) {
     etw_stats_      = EtwStats{};
     etw_counters_.clear();
     etw_diag_count_ = 0;
+    etw_end_ns_     = 0;
     etw_hello_seen_ = false;
     etw_rejected_   = false;
     ++data_version_;
@@ -528,6 +529,7 @@ void Trace::IngestEtwLine(std::string_view line) {
     }
     if (etw_rejected_) return;
     ++data_version_;
+    if (j.contains("ts_ns")) etw_end_ns_ = std::max(etw_end_ns_, ts);
 
     if (ev == "location") {
         const uint64_t id = j.value("id", (uint64_t)0);
