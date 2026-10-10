@@ -70,8 +70,9 @@ private:
                           const std::function<bool(size_t, size_t)>& less);
     // Export the objects at `rows` (indices into trace_.objects()) as a loadable
     // mini-trace .jsonl: hello + modules + created/residency_priority per object,
-    // each tagged with its category-tree path. Returns false and sets `err` on
-    // failure. `ref_t` is recorded as the snapshot time.
+    // each tagged with its category-tree path (and, with ETW data, its location
+    // at `ref_t`). Returns false and sets `err` on failure. `ref_t` is recorded
+    // as the snapshot time.
     bool SaveAllocations(const std::string& path, const std::vector<size_t>& rows,
                          uint64_t ref_t, std::string& err);
 
@@ -93,7 +94,8 @@ private:
     // Multi-select dropdown over the distinct values in `sel` (value -> shown).
     void FilterCombo(const char* label, std::map<std::string, bool>& sel);
 
-    enum class PlotMode { Total, ByHeap, ByAlloc, ByPriority };
+    // ByLocation needs the ETW sidecar (VRAM / Sys / Unknown / n/a).
+    enum class PlotMode { Total, ByHeap, ByAlloc, ByPriority, ByLocation };
 
     Trace        trace_;
     bool         loaded_      = false;
@@ -105,6 +107,8 @@ private:
     bool         show_counts_ = false;
     bool         split_host_  = true; // Upload/Readback in a second graph
     bool         graph_follow_ = false; // keep the graph's right edge at "now"
+    bool         show_etw_counters_ = true; // ETW local usage/budget lines
+    bool         show_loc_lines_    = true; // ETW VRAM/Sys/Unknown overlay lines
 
     // Shared X-axis range so the split graphs pan/zoom together.
     double       xlink_min_   = 0.0;
@@ -133,9 +137,13 @@ private:
     // Seeded with the full set of values dx12track can emit (see EventTypes.h),
     // and topped up from the data; everything defaults to shown.
     std::map<std::string, bool> type_show_, alloc_show_, heap_show_, dim_show_, prio_show_;
+    // Location filter (LocBucketName values); only shown/applied with ETW data.
+    std::map<std::string, bool> loc_show_;
 
     // Scratch buffers reused across frames for ImPlot (avoids per-frame alloc).
     std::vector<double> xs_, ys_, lo_, hi_;
+    std::vector<double> cxs_, cys_; // ETW counter overlay (all modes)
+    std::vector<double> lxs_, lys_; // location line overlay (not By location)
 
     // --- category filtering / tree view ---
     char                    config_buf_[8192] = {}; // editable category config

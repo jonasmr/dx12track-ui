@@ -48,15 +48,18 @@ Four docked panels: **Memory over time** (top-left), **Active allocations** (bot
 
 ## Data format (from `dx12track/src/common/EventTypes.h`)
 
-One JSON object per line. `hello.protocol` is `1` (no callstacks) or `2`.
+One JSON object per line. `hello.protocol` is `1` (no callstacks), `2` (modules + stacks), `3` (residency priority) or `4` (ETW join keys). `dx12track/FORMAT.md` is the full spec; every version is additive for JSONL readers, so nothing is rejected by protocol number.
 
-- `hello` — `pid`, `protocol`, `qpc_freq`, `exe`
+- `hello` — `pid`, `protocol`, `qpc_freq`, `exe`, `qpc_start` *(proto 4: QPC at `ts_ns` 0)*
 - `module_loaded` *(proto 2)* — `base`(hex str), `size`, `timestamp`, `pdb_age`, `pdb_guid`, `name`, `pdb_name`
 - `module_unloaded` *(proto 2)* — `base`
-- `created` — `id`, `type`, `alloc`, `heap`, `dim`, `format`, `size`, `parent_heap_id`, `name`, `stack`(hex-string array, **optional**)
+- `created` — `id`, `ptr` *(proto 4: app-visible interface pointer, hex str)*, `type`, `alloc`, `heap`, `dim`, `format`, `size`, `parent_heap_id`, `parent_heap_ptr` *(proto 3, Placed only)*, `name`, `stack`(hex-string array, **optional**)
+- `residency_priority` *(proto 3)* — `id`, `object_ptr`, `priority`, `priority_name`
 - `renamed` — `id`, `name`
 - `destroyed` — `id`
 - `goodbye` — `exit_code`
+
+**ETW sidecar** (`dx12track.exe --etw`): a second file next to the main log, `run.jsonl` → `run.etw.jsonl` (a path not ending in `.jsonl` gets `.etw.jsonl` appended). Same `ts_ns` timeline as the main log but lines are **not** sorted by `ts_ns`; it refers to main-log objects only by `id`. Events: `etw_hello` (first; `pid`/`qpc_start` copied from the main hello), `etw_bind` (`id`, `lib_id`, optional `late`), `location` (`id`, `group` = vram|sys|unknown, `via` = self|heap; on first bind and every change), `driver_size` (`id`, `bytes`), `residency` (`id`, `op` = page_in|page_out), `counters` (1/s, process video-memory counters in bytes), `etw_object`, `etw_object_destroyed`, `etw_diag`, `etw_stats` (last).
 
 Value domains (mirrored as hardcoded lists in `App.cpp` to avoid pulling in the DirectX/Agility headers):
 - type: Unknown, Device, Resource, Heap, DescriptorHeap, CommandQueue, CommandAllocator, CommandList, PipelineState, RootSignature, Fence, QueryHeap, CommandSignature
@@ -80,6 +83,12 @@ The UI parses the string fields directly — it needs **no** DirectX headers.
 - **Callstacks** (proto 2): clicking a row resolves that allocation's stack **on demand** via `SymbolResolver` and shows it in the dx12track panel. PDBs are located by recorded path / next to the module / extension-swap, parsed once with raw_pdb (module `S_*PROC32` + public `S_PUB32`), public names undecorated via `UnDecorateSymbolName`, cached per module.
 - **File loading**: `Open...` button, drag-drop a `.jsonl` onto the window, default live-tail ON, prompt if the startup file is missing. Startup file order: command-line arg → last-opened (persisted in `%LOCALAPPDATA%\dx12track-ui\last_file.txt`) → `dx12track.jsonl` → prompt.
 - **Live-tail restart detection**: if the file shrinks (truncated/replaced) → full reload; a second `hello` mid-stream → reset model. A `Trace::generation()` counter bumps on every fresh capture; `App` watches it to clear per-trace UI state and re-snap to the new peak.
+- **ETW sidecar** (all UI below appears only when one is loaded; otherwise the UI is unchanged apart from an "etw : no ETW sidecar" status line):
+  - Loading: `Trace::Load/Reload` derive the sidecar path and load it if present; opening a `*.etw.jsonl` directly opens its main log. Both files are tailed by `PollTail()` through the shared `LineTail` reader; a missing sidecar is re-checked every poll (the launcher may create it late). The sidecar is only read after the main `hello`; an `etw_hello` whose `pid`/`qpc_start` don't match it is a stale file from another run and is ignored (warning in the status panel). Any fresh main capture (reload, shrink, `hello` mid-stream) drops all ETW state and re-reads the sidecar from offset 0; a sidecar shrink or a second `etw_hello` resets ETW state too. Sidecar lines for ids whose `created` hasn't been read yet are buffered (`pending_etw_`) and applied when it arrives.
+  - Model: `Obj::etw` holds the location history (sorted by ts on insert), latest `driver_size`, page-in/out counts, bind info. `Obj::LocationAt(t)` → `kLocVram` / `kLocSys` / `kLocUnknown` (ETW said unknown) / `kLocNA` (nothing known at t: unbound, or before the first `location`).
+  - UI: `location` column (value at the tab's ref time; tooltip shows via, history, paging, driver size) + `Location` filter (also applies to Save...); VRAM/Sys/Unknown/n/a breakdown in the Memory summary; **By location** timeline mode (stacked, counted memory only, splittable); two timeline overlays, each with a toolbar checkbox (default on): the `local_usage` / `local_budget` counters in every mode (budget is left off-scale if it's far above the data), and VRAM/Sys/Unknown location lines in every mode except By location; neither is drawn in the host-visible split panel; sidecar path, ETW stats and an events/buffers-lost warning in the dx12track panel.
+  - The by-location series (`Trace::LocationSeries()`) is built separately from `samples_` by a time-sorted sweep over create/destroy + location changes, because location lines arrive out of order. It is cached on `Trace::data_version()` and only rebuilt when either file changed and the mode is shown.
+  - Save... writes `qpc_start` / `ptr` (v4) and, with ETW data, a `"location"` (value at the snapshot time) next to `"category"`.
 
 ---
 
@@ -101,5 +110,6 @@ Build, then run against `dx12track.jsonl` (proto 2) and `old-dx12track.jsonl` (p
 - Click the `Texture` allocation → callstack resolves to `Texture::Create2D → Graphics::Initialize → … → wWinMainCRTStartup`.
 - Shift-drag the startup ramp → the *Allocations*/*Frees*/*Alloc&Free* tabs populate with distinct sets.
 - Live-tail: copy the sample to a temp file, tail it, then truncate+rewrite a new `hello` → the UI resets instead of stacking.
+- ETW: there is no real sidecar sample in the repo. To exercise the ETW UI, write a `<name>.etw.jsonl` next to a copy of a log following `dx12track/FORMAT.md` (`etw_hello` with the log's `pid`, then `etw_bind` + `location` lines for some Committed ids); the location column, summary breakdown and **By location** mode should appear.
 
 Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>

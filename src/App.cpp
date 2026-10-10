@@ -192,6 +192,25 @@ ImVec4 PriorityColor(int bucket) {
     }
 }
 
+// Color for a memory-location bucket (from LocBucket); shared by the table
+// column and the By-location graph.
+ImVec4 LocationColor(int bucket) {
+    switch (bucket) {
+        case kLocVram:    return ImVec4(0.35f, 0.75f, 0.40f, 1.0f); // green
+        case kLocSys:     return ImVec4(0.95f, 0.55f, 0.20f, 1.0f); // orange
+        case kLocUnknown: return ImVec4(0.65f, 0.55f, 0.85f, 1.0f); // lavender
+        default:          return ImVec4(0.50f, 0.50f, 0.50f, 1.0f); // n/a - gray
+    }
+}
+
+// Display/sort order of the location buckets: VRAM, Sys, Unknown, n/a.
+constexpr int kLocOrder[kLocBuckets] = {kLocVram, kLocSys, kLocUnknown, kLocNA};
+int LocSortKey(int bucket) {
+    for (int i = 0; i < kLocBuckets; ++i)
+        if (kLocOrder[i] == bucket) return i;
+    return kLocBuckets;
+}
+
 // Path of the tiny settings file that remembers the last opened trace.
 std::string LastFileRecordPath() {
     std::error_code ec;
@@ -314,6 +333,8 @@ App::App(std::string jsonl_path) {
         dim_show_[v] = true;
     for (const char* v : {"Unset", "Minimum", "Low", "Normal", "High", "Maximum", "Custom"})
         prio_show_[v] = true;
+    for (int b = 0; b < kLocBuckets; ++b)
+        loc_show_[LocBucketName(b)] = true;
 
     // Load the persisted category-filter config and build the tree.
     std::string cfg = ReadMemoryConfig();
@@ -506,6 +527,54 @@ void App::DrawMenuBar() {
 
     ImGui::Text("modules : %zu", trace_.modules().size());
 
+    // --- ETW sidecar (dx12track --etw) ---
+    if (trace_.etw_rejected()) {
+        ImGui::TextColored(ImVec4(1, 0.6f, 0.2f, 1),
+                           "ETW sidecar ignored: from another run (pid %u)",
+                           trace_.etw_hello().pid);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s\nIts etw_hello pid/qpc_start don't match this log's hello.",
+                              trace_.etw_path().c_str());
+    } else if (trace_.has_etw()) {
+        const EtwStats& st = trace_.etw_stats();
+        ImGui::TextWrapped("etw : %s", trace_.etw_path().c_str());
+        if (st.events_lost > 0 || st.buffers_lost > 0)
+            ImGui::TextColored(ImVec4(1, 0.4f, 0.4f, 1),
+                "ETW data incomplete: %llu events / %llu buffers lost",
+                (unsigned long long)st.events_lost, (unsigned long long)st.buffers_lost);
+        if (ImGui::TreeNode("ETW details")) {
+            const EtwHello& h = trace_.etw_hello();
+            ImGui::Text("session %s  (format %u)", h.session.empty() ? "?" : h.session.c_str(),
+                        h.etw_format);
+            ImGui::Text("diagnostics : %u", trace_.etw_diag_count());
+            const auto& ctr = trace_.etw_counters();
+            if (!ctr.empty()) {
+                const EtwCounters& c = ctr.back();
+                auto show = [](const char* k, uint64_t v) {
+                    if (v != kNoCounter) ImGui::Text("%s : %s", k, FormatBytes(v).c_str());
+                };
+                ImGui::SeparatorText("Latest counters");
+                show("local budget",   c.local_budget);
+                show("local usage",    c.local_usage);
+                show("local resident", c.local_resident);
+                show("non-local usage",  c.nonlocal_usage);
+                show("demoted",        c.demoted);
+            }
+            if (st.present) {
+                ImGui::SeparatorText("etw_stats");
+                for (const auto& [k, v] : st.all)
+                    if (v) ImGui::Text("%s : %llu", k.c_str(), (unsigned long long)v);
+            } else {
+                ImGui::TextDisabled("(no etw_stats yet: session running or killed)");
+            }
+            ImGui::TreePop();
+        }
+    } else {
+        ImGui::TextDisabled("etw : no ETW sidecar");
+        if (ImGui::IsItemHovered() && !trace_.etw_path().empty())
+            ImGui::SetTooltip("looked for %s", trace_.etw_path().c_str());
+    }
+
     ImGui::Separator();
     ImGui::TextWrapped("file: %s", trace_.path().c_str());
     if (ImGui::Button("Reload")) {
@@ -576,6 +645,15 @@ void App::DrawTimeline() {
     ImGui::SameLine();
     ImGui::RadioButton("By priority", (int*)&mode_, (int)PlotMode::ByPriority);
     ImGui::SameLine();
+    // Location comes from the ETW sidecar; without one the mode doesn't exist.
+    if (trace_.has_etw()) {
+        ImGui::RadioButton("By location", (int*)&mode_, (int)PlotMode::ByLocation);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Counted memory by ETW-reported location (VRAM / system memory)");
+        ImGui::SameLine();
+    } else if (mode_ == PlotMode::ByLocation) {
+        mode_ = PlotMode::Total;
+    }
     if (ImGui::Button("Jump to peak")) SetSelected(trace_.peak_ts_ns());
     ImGui::SameLine();
     if (ImGui::Button("Jump to end")) SetSelected(trace_.end_ns);
@@ -595,6 +673,17 @@ void App::DrawTimeline() {
     ImGui::Checkbox("Follow tail", &graph_follow_);
     if (ImGui::IsItemHovered())
         ImGui::SetTooltip("Show the last 100s and pin the cursor to the latest sample");
+    // ETW overlays; like By location, they only exist with a sidecar.
+    if (trace_.has_etw()) {
+        ImGui::SameLine();
+        ImGui::Checkbox("Local usage/budget", &show_etw_counters_);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Overlay the process's ETW local video memory usage and budget");
+        ImGui::SameLine();
+        ImGui::Checkbox("Location lines", &show_loc_lines_);
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("Overlay counted memory per ETW location (VRAM / Sys / Unknown)");
+    }
 
     // Escape clears the selected range.
     if ((range_valid_ || dragging_range_) && ImGui::IsKeyPressed(ImGuiKey_Escape)) {
@@ -609,10 +698,25 @@ void App::DrawTimeline() {
         return;
     }
 
-    const size_t N = samples.size();
-    xs_.resize(N);
-    for (size_t i = 0; i < N; ++i)
-        xs_[i] = NsToSeconds(samples[i].ts_ns, trace_.start_ns);
+    if (mode_ == PlotMode::ByLocation) {
+        // The location series is a step function (value holds until the next
+        // sample); duplicate each X so the shaded bands are drawn as stairs,
+        // and extend the last value to the end of the trace.
+        const auto& ls = trace_.LocationSeries();
+        xs_.clear();
+        for (size_t i = 0; i < ls.size(); ++i) {
+            const double x = NsToSeconds(ls[i].ts_ns, trace_.start_ns);
+            if (i > 0) xs_.push_back(x); // end of the previous step
+            xs_.push_back(x);
+        }
+        if (!ls.empty() && trace_.end_ns > ls.back().ts_ns)
+            xs_.push_back(NsToSeconds(trace_.end_ns, trace_.start_ns));
+    } else {
+        const size_t N = samples.size();
+        xs_.resize(N);
+        for (size_t i = 0; i < N; ++i)
+            xs_[i] = NsToSeconds(samples[i].ts_ns, trace_.start_ns);
+    }
 
     const double latest = NsToSeconds(trace_.end_ns, trace_.start_ns);
     // Default X view: the whole capture, but at least 0..100s.
@@ -680,10 +784,47 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
         return (heap_filter == 1) ? s.by_prio_dev : s.by_prio;
     };
 
+    // By location: stacked VRAM / Sys / Unknown / n/a from the (separately
+    // built, time-sorted) location series. xs_ holds its stair-step expansion;
+    // loc_pt maps each plotted point to its source sample.
+    const bool by_loc = (mode_ == PlotMode::ByLocation);
+    // In the other modes, with ETW data, the same series is overlaid as
+    // unfilled VRAM / Sys / Unknown lines (see below). Not in the host-visible
+    // panel: Upload/Readback memory is always system memory.
+    const bool loc_lines = show_loc_lines_ && !by_loc && heap_filter != 2 && trace_.has_etw();
+    static const std::vector<LocSample> kNoLoc;
+    const std::vector<LocSample>& lser =
+        (by_loc || loc_lines) ? trace_.LocationSeries() : kNoLoc;
+    std::vector<uint32_t> loc_pt;
+    if (by_loc) {
+        for (size_t i = 0; i < lser.size(); ++i) {
+            if (i > 0) loc_pt.push_back((uint32_t)(i - 1));
+            loc_pt.push_back((uint32_t)i);
+        }
+        if (!lser.empty() && xs_.size() > loc_pt.size())
+            loc_pt.push_back((uint32_t)(lser.size() - 1)); // extended to trace end
+    }
+    auto loc_val = [heap_filter](const LocSample& s, int b) -> uint64_t {
+        if (heap_filter == 1) return s.by_loc_dev[b];
+        if (heap_filter == 2) return s.by_loc[b] - s.by_loc_dev[b];
+        return s.by_loc[b];
+    };
+    // The process video-memory counters (ETW) describe device-local memory, so
+    // they're overlaid in every mode except in the host-visible panel.
+    const bool show_ctr = show_etw_counters_ && heap_filter != 2 && trace_.has_etw() &&
+                          !trace_.etw_counters().empty();
+
     // Peak of whatever this panel will display, so we can leave headroom above
     // it (AutoFit pins the max flush against the top edge, hiding the peak).
     double ymax = 0.0;
-    for (size_t i = 0; i < N; ++i) {
+    if (by_loc) {
+        for (const LocSample& s : lser) {
+            uint64_t sum = 0;
+            for (int b = 0; b < kLocBuckets; ++b) sum += loc_val(s, b);
+            ymax = std::max(ymax, (double)sum);
+        }
+    }
+    for (size_t i = 0; i < N && !by_loc; ++i) {
         uint64_t s = 0;
         if (stacking_alloc) {
             for (int b = 1; b < kAllocBuckets; ++b) s += samples[i].by_alloc[b];
@@ -696,6 +837,28 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
         }
         if ((double)s > ymax) ymax = (double)s;
     }
+    // Location overlay lines: per-bucket peaks (a zero peak hides the line).
+    // n/a is never drawn as a line.
+    constexpr int kLineBuckets[] = {kLocVram, kLocSys, kLocUnknown};
+    double line_max[kLocBuckets] = {};
+    if (loc_lines) {
+        for (const LocSample& s : lser)
+            for (int b : kLineBuckets)
+                line_max[b] = std::max(line_max[b], (double)loc_val(s, b));
+        for (int b : kLineBuckets) ymax = std::max(ymax, line_max[b]);
+    }
+    // Counter overlay: local usage always counts toward the scale; local
+    // budget only if it's within 2x of everything else.
+    double budget_max = 0.0;
+    if (show_ctr) {
+        for (const EtwCounters& c : trace_.etw_counters()) {
+            if (c.local_usage != kNoCounter)
+                ymax = std::max(ymax, (double)c.local_usage);
+            if (c.local_budget != kNoCounter)
+                budget_max = std::max(budget_max, (double)c.local_budget);
+        }
+        if (budget_max > 0.0 && budget_max <= ymax * 2.0) ymax = std::max(ymax, budget_max);
+    }
 
     ImPlot::SetupAxes("time (s)", "memory", ImPlotAxisFlags_None, ImPlotAxisFlags_None);
     ImPlot::SetupAxisFormat(ImAxis_Y1, ByteAxisFormatter);
@@ -706,7 +869,28 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
     ImPlot::SetupAxisLinks(ImAxis_X1, &xlink_min_, &xlink_max_);
     ImPlot::SetupLegend(ImPlotLocation_NorthWest);
 
-    if (mode_ != PlotMode::Total) {
+    if (by_loc) {
+        const size_t P = std::min(loc_pt.size(), xs_.size());
+        std::vector<double> baseline(P, 0.0);
+        ImPlotSpec fill;
+        fill.FillAlpha = 1.0f; // opaque, see the stacked-band note below
+        for (int b : kLocOrder) {
+            lo_.resize(P);
+            hi_.resize(P);
+            bool any = false;
+            for (size_t k = 0; k < P; ++k) {
+                const uint64_t v = loc_val(lser[loc_pt[k]], b);
+                lo_[k] = baseline[k];
+                hi_[k] = baseline[k] + (double)v;
+                baseline[k] = hi_[k];
+                if (v) any = true;
+            }
+            if (!any) continue;
+            fill.FillColor = LocationColor(b);
+            ImPlot::PlotShaded(LocBucketName(b), xs_.data(), lo_.data(), hi_.data(),
+                               (int)P, fill);
+        }
+    } else if (mode_ != PlotMode::Total) {
         // Priority shows the Unset band (bucket 0) too; heap/alloc skip bucket 0.
         const int first = stacking_prio ? 0 : 1;
         const int last  = stacking_heap ? kHeapBuckets
@@ -751,6 +935,58 @@ void App::DrawTimelinePanel(const char* plot_id, float height, int heap_filter) 
         fill.FillAlpha = 0.25f;
         ImPlot::PlotShaded(lbl, xs_.data(), ys_.data(), (int)N, 0.0, fill);
         ImPlot::PlotStairs(lbl, xs_.data(), ys_.data(), (int)N);
+    }
+
+    // Location overlay: counted memory per ETW location as unfilled stairs on
+    // top of the current mode's graph. The series has its own timestamps, so
+    // it gets its own X buffer; the last value is extended to the trace end.
+    if (loc_lines && !lser.empty()) {
+        lxs_.clear();
+        for (const LocSample& s : lser) lxs_.push_back(NsToSeconds(s.ts_ns, trace_.start_ns));
+        const bool extend = trace_.end_ns > lser.back().ts_ns;
+        if (extend) lxs_.push_back(NsToSeconds(trace_.end_ns, trace_.start_ns));
+        ImPlotSpec ls;
+        ls.LineWeight = 2.0f;
+        for (int b : kLineBuckets) {
+            if (line_max[b] <= 0.0) continue;
+            lys_.clear();
+            for (const LocSample& s : lser) lys_.push_back((double)loc_val(s, b));
+            if (extend) lys_.push_back(lys_.back());
+            ls.LineColor = LocationColor(b);
+            // Distinct ID from the By-location bands; visible label unchanged.
+            const std::string label = std::string(LocBucketName(b)) + "###loc_line_" +
+                                      std::to_string(b);
+            ImPlot::PlotStairs(label.c_str(), lxs_.data(), lys_.data(), (int)lxs_.size(), ls);
+        }
+    }
+
+    // Counter overlay: the process's ETW local (device) memory usage and
+    // budget, on top of whatever the current mode drew.
+    if (show_ctr) {
+        const auto& ctr = trace_.etw_counters();
+        auto plot_ctr = [&](const char* label, uint64_t EtwCounters::*field,
+                            const ImVec4& col) {
+            cxs_.clear();
+            cys_.clear();
+            for (const EtwCounters& c : ctr)
+                if (c.*field != kNoCounter) {
+                    cxs_.push_back(NsToSeconds(c.ts_ns, trace_.start_ns));
+                    cys_.push_back((double)(c.*field));
+                }
+            if (cxs_.empty()) return;
+            ImPlotSpec ls;
+            ls.LineColor  = col;
+            ls.LineWeight = 2.0f;
+            ImPlot::PlotLine(label, cxs_.data(), cys_.data(), (int)cxs_.size(), ls);
+        };
+        plot_ctr("local usage (ETW)", &EtwCounters::local_usage, ImVec4(1, 1, 1, 0.9f));
+        // Budget is often far above the app's usage; rather than squash the
+        // graph, leave it off-scale and say so in the legend.
+        std::string blabel = "local budget (ETW)";
+        if (budget_max > ymax * 1.03)
+            blabel += " " + FormatBytes((uint64_t)budget_max) + ", off scale";
+        blabel += "###budget";
+        plot_ctr(blabel.c_str(), &EtwCounters::local_budget, ImVec4(1, 0.3f, 0.3f, 0.9f));
     }
 
     const bool hovered = ImPlot::IsPlotHovered();
@@ -881,6 +1117,34 @@ void App::DrawSummary() {
         else              ImGui::TextUnformatted(FormatBytes(grand).c_str());
 
         ImGui::EndTable();
+    }
+
+    // --- counted memory by ETW-reported location ---
+    if (trace_.has_etw()) {
+        ImGui::SeparatorText("By location (ETW)");
+        if (ImGui::BeginTable("loc", 3, tflags)) {
+            ImGui::TableSetupColumn("Location");
+            ImGui::TableSetupColumn(show_counts_ ? "Count" : "Memory");
+            ImGui::TableSetupColumn("Share");
+            ImGui::TableHeadersRow();
+            for (int b : kLocOrder) {
+                ImGui::TableNextRow();
+                ImGui::TableNextColumn();
+                ImGui::TextColored(LocationColor(b), "%s", LocBucketName(b));
+                if (b == kLocNA && ImGui::IsItemHovered())
+                    ImGui::SetTooltip("No location known: not bound to an ETW object, "
+                                      "or before its first location report");
+                ImGui::TableNextColumn();
+                if (show_counts_) ImGui::Text("%llu", (unsigned long long)m.loc_counts[b]);
+                else              ImGui::TextUnformatted(FormatBytes(m.loc_bytes[b]).c_str());
+                ImGui::TableNextColumn();
+                if (m.total_bytes)
+                    ImGui::Text("%.1f%%", 100.0 * (double)m.loc_bytes[b] / (double)m.total_bytes);
+                else
+                    ImGui::TextUnformatted("-");
+            }
+            ImGui::EndTable();
+        }
     }
 
     // --- live objects by type ---
@@ -1101,6 +1365,7 @@ void App::DrawAllocations() {
     ImGui::SameLine(); FilterCombo("Heap", heap_show_);
     ImGui::SameLine(); FilterCombo("Dim", dim_show_);
     ImGui::SameLine(); FilterCombo("Priority", prio_show_);
+    if (trace_.has_etw()) { ImGui::SameLine(); FilterCombo("Location", loc_show_); }
     ImGui::SameLine(); ImGui::Checkbox("Tree view", &show_tree_);
 
     const uint64_t s0 = trace_.start_ns;
@@ -1163,7 +1428,8 @@ void App::SelectObject(const Obj& o) {
     picked_frames_ = resolver_.Resolve(o.stack, trace_);
 }
 
-// Render one allocation as a 10-column table row (shared by flat + tree views).
+// Render one allocation as a table row (shared by flat + tree views): 10
+// columns, plus `location` after `priority` when the trace has ETW data.
 void App::DrawAllocRow(const Obj& o, uint64_t ref_t) {
     ImGui::TableNextRow();
     ImGui::TableNextColumn();
@@ -1187,6 +1453,49 @@ void App::DrawAllocRow(const Obj& o, uint64_t ref_t) {
     ImGui::TextColored(PriorityColor(o.prio_bucket), "%s", o.priority_name.c_str());
     if (o.prio_bucket == 6 /*Custom*/ && ImGui::IsItemHovered())
         ImGui::SetTooltip("raw priority = %d (0x%X)", o.priority, (unsigned)o.priority);
+    if (trace_.has_etw()) {
+        // Location at the tab's reference time, with the ETW details on hover.
+        ImGui::TableNextColumn();
+        const LocEntry* le = o.LocationEntryAt(ref_t);
+        const int loc = le ? le->loc : kLocNA;
+        ImGui::TextColored(LocationColor(loc), "%s", LocBucketName(loc));
+        if (ImGui::IsItemHovered()) {
+            const EtwObjInfo& e = o.etw;
+            std::string tip;
+            char buf[160];
+            if (!e.bound) {
+                tip = "not bound to an ETW object";
+            } else {
+                std::snprintf(buf, sizeof buf, "ETW lib_id %llu%s",
+                              (unsigned long long)e.lib_id,
+                              e.late ? " (late bind: destroyed before ETW saw it)" : "");
+                tip = buf;
+            }
+            if (le) {
+                std::snprintf(buf, sizeof buf, "\nvia %s", le->via_heap ? "heap (follows its parent heap)"
+                                                                       : "self");
+                tip += buf;
+            }
+            std::snprintf(buf, sizeof buf, "\nlocation reports: %zu", e.locations.size());
+            tip += buf;
+            for (const LocEntry& h : e.locations) {
+                std::snprintf(buf, sizeof buf, "\n  %s  %s%s",
+                              FormatNs(h.ts_ns >= trace_.start_ns ? h.ts_ns - trace_.start_ns : 0).c_str(),
+                              LocBucketName(h.loc), h.via_heap ? " (via heap)" : "");
+                tip += buf;
+                if (&h - e.locations.data() >= 15 && e.locations.size() > 17) {
+                    std::snprintf(buf, sizeof buf, "\n  ... %zu more", e.locations.size() - 16);
+                    tip += buf;
+                    break;
+                }
+            }
+            std::snprintf(buf, sizeof buf, "\npage-ins %u  page-outs %u", e.page_ins, e.page_outs);
+            tip += buf;
+            if (e.driver_size)
+                tip += "\ndriver size " + FormatBytes(e.driver_size);
+            ImGui::SetTooltip("%s", tip.c_str());
+        }
+    }
     ImGui::TableNextColumn();
     uint64_t age = ref_t >= o.created_ns ? ref_t - o.created_ns : 0;
     ImGui::TextUnformatted(FormatNs(age).c_str());
@@ -1233,12 +1542,17 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
     std::vector<size_t> rows;
     rows.reserve(objs.size());
     uint64_t total_size = 0;
+    // The location filter only exists (and only applies) with ETW data.
+    const bool etw = trace_.has_etw();
+    bool loc_ok[kLocBuckets];
+    for (int b = 0; b < kLocBuckets; ++b) loc_ok[b] = loc_show_[LocBucketName(b)];
     for (size_t i = 0; i < objs.size(); ++i) {
         const Obj& o = objs[i];
         if (!include(o)) continue;
         if (!type_show_[o.type] || !alloc_show_[o.alloc] ||
             !heap_show_[o.heap] || !dim_show_[o.dim] ||
             !prio_show_[o.priority_name]) continue;
+        if (etw && !loc_ok[o.LocationAt(ref_t)]) continue;
         if (!flt.empty() && ToLower(o.name).find(flt) == std::string::npos) continue;
         rows.push_back(i);
         // Placed resources alias into a heap and Reserved are virtual, so they
@@ -1273,9 +1587,10 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
         ImGuiTableFlags_Sortable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SortTristate;
 
     enum Col { C_Id, C_Type, C_Alloc, C_Heap, C_Dim, C_Format, C_Size, C_Prio,
-               C_Age, C_Name };
+               C_Loc, C_Age, C_Name };
 
-    if (!ImGui::BeginTable(id, 10, tflags)) return;
+    // The location column only exists with ETW data (see DrawAllocRow).
+    if (!ImGui::BeginTable(id, etw ? 11 : 10, tflags)) return;
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableSetupColumn("id",     ImGuiTableColumnFlags_WidthFixed |
                                       ImGuiTableColumnFlags_DefaultSort, 0, C_Id);
@@ -1286,7 +1601,9 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
     ImGui::TableSetupColumn("format", ImGuiTableColumnFlags_WidthFixed, 0, C_Format);
     ImGui::TableSetupColumn("size",   ImGuiTableColumnFlags_WidthFixed, 0, C_Size);
     ImGui::TableSetupColumn("priority", ImGuiTableColumnFlags_WidthFixed, 0, C_Prio);
-    ImGui::TableSetupColumn("age",    ImGuiTableColumnFlags_WidthFixed, 0, C_Age);
+    if (etw)
+        ImGui::TableSetupColumn("location", ImGuiTableColumnFlags_WidthFixed, 0, C_Loc);
+    ImGui::TableSetupColumn("age",   ImGuiTableColumnFlags_WidthFixed, 0, C_Age);
     ImGui::TableSetupColumn("name",   ImGuiTableColumnFlags_WidthStretch, 0, C_Name);
     ImGui::TableHeadersRow();
 
@@ -1296,7 +1613,7 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
         ss && ss->SpecsCount > 0) {
         const int  col = ss->Specs[0].ColumnUserID;
         const bool asc = ss->Specs[0].SortDirection == ImGuiSortDirection_Ascending;
-        less = [this, col, asc](size_t a, size_t b) {
+        less = [this, col, asc, ref_t](size_t a, size_t b) {
             const auto& os = trace_.objects();
             const Obj& x = os[a];
             const Obj& y = os[b];
@@ -1310,6 +1627,8 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
                 case C_Format: c = (int)x.format - (int)y.format; break;
                 case C_Size:   c = (x.size < y.size) ? -1 : (x.size > y.size); break;
                 case C_Prio:   c = x.prio_bucket - y.prio_bucket; break;
+                case C_Loc:    c = LocSortKey(x.LocationAt(ref_t)) -
+                                   LocSortKey(y.LocationAt(ref_t)); break;
                 case C_Age:    c = (x.created_ns > y.created_ns) ? -1
                                    : (x.created_ns < y.created_ns); break;
                 case C_Name:   c = x.name.compare(y.name); break;
@@ -1399,6 +1718,7 @@ bool App::SaveAllocations(const std::string& path, const std::vector<size_t>& ro
     hello["pid"]            = trace_.pid;
     hello["protocol"]       = trace_.protocol;
     hello["qpc_freq"]       = trace_.qpc_freq;
+    if (trace_.protocol >= 4) hello["qpc_start"] = trace_.qpc_start;
     hello["exe"]            = trace_.exe;
     hello["source"]         = trace_.path();
     hello["snapshot_ts_ns"] = ref_t;
@@ -1437,6 +1757,7 @@ bool App::SaveAllocations(const std::string& path, const std::vector<size_t>& ro
         j["event"]          = "created";
         j["ts_ns"]          = o.created_ns;
         j["id"]             = o.id;
+        if (o.ptr) j["ptr"] = hex(o.ptr);
         j["type"]           = o.type;
         j["alloc"]          = o.alloc;
         j["heap"]           = o.heap;
@@ -1447,6 +1768,8 @@ bool App::SaveAllocations(const std::string& path, const std::vector<size_t>& ro
         if (o.parent_heap_ptr) j["parent_heap_ptr"] = hex(o.parent_heap_ptr);
         j["name"]           = o.name; // current (post-rename) name
         j["category"]       = category(idx);
+        // ETW-reported location at the snapshot time (VRAM/Sys/Unknown/n/a).
+        if (trace_.has_etw()) j["location"] = LocBucketName(o.LocationAt(ref_t));
         if (!o.stack.empty()) {
             ojson stack = ojson::array();
             for (uint64_t a : o.stack) stack.push_back(hex(a));
