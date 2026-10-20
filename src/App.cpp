@@ -211,6 +211,46 @@ int LocSortKey(int bucket) {
     return kLocBuckets;
 }
 
+// Heap-use cell text: "?" when some placed resource has no heap offset, else
+// the covered percentage of the heap.
+std::string HeapUseText(const HeapUsage& u) {
+    if (!u.known())            return "?";
+    if (u.used == 0)           return "0%";
+    if (u.used >= u.heap_size) return "100%";
+    char buf[16];
+    std::snprintf(buf, sizeof buf, "%.1f%%", 100.0 * u.fraction());
+    return buf;
+}
+
+// Heap-use details (cell tooltip, placed-info panel). `protocol` is the
+// trace's, for explaining missing offsets.
+std::string HeapUseDetails(const HeapUsage& u, uint32_t protocol) {
+    char buf[256];
+    if (u.placed == 0) {
+        std::snprintf(buf, sizeof buf, "no live placed resources\nheap size %s",
+                      FormatBytes(u.heap_size).c_str());
+        return buf;
+    }
+    if (!u.known()) {
+        std::snprintf(buf, sizeof buf,
+                      "%u of %u live placed resources have no heap offset:\n"
+                      "offsets are logged from dx12track protocol 5 on (this trace: %u)",
+                      u.no_offset, u.placed, protocol);
+        return buf;
+    }
+    std::snprintf(buf, sizeof buf, "used %s of %s (%s)\n%u live placed resource%s",
+                  FormatBytes(u.used).c_str(), FormatBytes(u.heap_size).c_str(),
+                  HeapUseText(u).c_str(), u.placed, u.placed == 1 ? "" : "s");
+    std::string s = buf;
+    if (u.overlaps())
+        std::snprintf(buf, sizeof buf,
+                      "\noverlap: yes, sizes sum to %s (> %s used): aliased resources",
+                      FormatBytes(u.sum).c_str(), FormatBytes(u.used).c_str());
+    else
+        std::snprintf(buf, sizeof buf, "\noverlap: no");
+    return s + buf;
+}
+
 // Path of the tiny settings file that remembers the last opened trace.
 std::string LastFileRecordPath() {
     std::error_code ec;
@@ -1241,6 +1281,13 @@ void App::DrawPlacedInfo() {
         // --- a Placed resource is selected: describe its parent heap ---
         ImGui::SeparatorText("Selected placed resource");
         obj_line("", *sel);
+        if (sel->has_heap_offset)
+            ImGui::Text("    heap offset %s  range [0x%llx, 0x%llx)",
+                        FormatBytes(sel->heap_offset).c_str(),
+                        (unsigned long long)sel->heap_offset,
+                        (unsigned long long)(sel->heap_offset + sel->size));
+        else
+            ImGui::TextDisabled("    heap offset unknown (logged from dx12track protocol 5 on)");
 
         ImGui::SeparatorText("Backed by heap");
         const Obj* heap = trace_.ObjectById(sel->parent_heap_id);
@@ -1262,6 +1309,10 @@ void App::DrawPlacedInfo() {
                         FormatNs(active_t - s0).c_str(),
                         (unsigned long long)placed_count,
                         FormatBytes(placed_bytes).c_str());
+            const HeapUsage u = trace_.HeapUsageOf(*heap, active_t);
+            ImGui::Text("    heap use %s", HeapUseText(u).c_str());
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("%s", HeapUseDetails(u, trace_.protocol).c_str());
 
             if (ImGui::Button("Go to heap")) SelectObject(*heap);
         } else {
@@ -1289,12 +1340,17 @@ void App::DrawPlacedInfo() {
         ImGui::SeparatorText("Placed resources inside (live at selected time)");
         ImGui::Text("at t=%s : %zu resources, %s", FormatNs(active_t - s0).c_str(),
                     kids.size(), FormatBytes(kids_bytes).c_str());
+        const HeapUsage u = trace_.HeapUsageOf(*sel, active_t);
+        ImGui::Text("heap use %s", HeapUseText(u).c_str());
+        if (ImGui::IsItemHovered())
+            ImGui::SetTooltip("%s", HeapUseDetails(u, trace_.protocol).c_str());
 
         const ImGuiTableFlags tflags = ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg |
                                        ImGuiTableFlags_ScrollY;
-        if (ImGui::BeginTable("placed_kids", 5, tflags)) {
+        if (ImGui::BeginTable("placed_kids", 6, tflags)) {
             ImGui::TableSetupScrollFreeze(0, 1);
             ImGui::TableSetupColumn("id");
+            ImGui::TableSetupColumn("offset");
             ImGui::TableSetupColumn("dim");
             ImGui::TableSetupColumn("format");
             ImGui::TableSetupColumn("size");
@@ -1312,6 +1368,16 @@ void App::DrawPlacedInfo() {
                     if (ImGui::Selectable(idbuf, picked_id_ == o.id,
                                           ImGuiSelectableFlags_SpanAllColumns))
                         SelectObject(o);
+                    ImGui::TableNextColumn();
+                    if (o.has_heap_offset) {
+                        ImGui::Text("0x%llx", (unsigned long long)o.heap_offset);
+                        if (ImGui::IsItemHovered())
+                            ImGui::SetTooltip("range [0x%llx, 0x%llx)",
+                                              (unsigned long long)o.heap_offset,
+                                              (unsigned long long)(o.heap_offset + o.size));
+                    } else {
+                        ImGui::TextUnformatted("?");
+                    }
                     ImGui::TableNextColumn(); ImGui::TextUnformatted(o.dim.c_str());
                     ImGui::TableNextColumn();
                     ImGui::TextUnformatted(FormatName(o.format).c_str());
@@ -1445,7 +1511,7 @@ void App::SelectObject(const Obj& o) {
     picked_frames_ = resolver_.Resolve(o.stack, trace_);
 }
 
-// Render one allocation as a table row (shared by flat + tree views): 10
+// Render one allocation as a table row (shared by flat + tree views): 11
 // columns, plus `location` after `priority` when the trace has ETW data.
 void App::DrawAllocRow(const Obj& o, uint64_t ref_t) {
     ImGui::TableNextRow();
@@ -1466,6 +1532,24 @@ void App::DrawAllocRow(const Obj& o, uint64_t ref_t) {
     ImGui::TableNextColumn();
     if (o.size) ImGui::TextUnformatted(FormatBytes(o.size).c_str());
     else        ImGui::TextUnformatted("-");
+    ImGui::TableNextColumn();
+    // Heap use: share of a heap covered by placed resources live at ref_t
+    // (heap_usage_, computed by DrawAllocTable). Blank for non-heaps.
+    if (o.alloc_bucket == kAllocHeap) {
+        if (!o.LiveAt(ref_t)) {
+            ImGui::TextUnformatted("-");
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("heap not live at %s",
+                                  FormatNs(ref_t - trace_.start_ns).c_str());
+        } else {
+            HeapUsage u;
+            u.heap_size = o.size;
+            if (auto it = heap_usage_.find(o.id); it != heap_usage_.end()) u = it->second;
+            ImGui::TextUnformatted(HeapUseText(u).c_str());
+            if (ImGui::IsItemHovered())
+                ImGui::SetTooltip("%s", HeapUseDetails(u, trace_.protocol).c_str());
+        }
+    }
     ImGui::TableNextColumn();
     ImGui::TextColored(PriorityColor(o.prio_bucket), "%s", o.priority_name.c_str());
     if (o.prio_bucket == 6 /*Custom*/ && ImGui::IsItemHovered())
@@ -1559,6 +1643,7 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
     std::vector<size_t> rows;
     rows.reserve(objs.size());
     uint64_t total_size = 0;
+    bool any_heap = false; // only then does the heap-use column need data
     // The location filter only exists (and only applies) with ETW data.
     const bool etw = trace_.has_etw();
     bool loc_ok[kLocBuckets];
@@ -1572,6 +1657,7 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
         if (etw && !loc_ok[o.LocationAt(ref_t)]) continue;
         if (!flt.empty() && ToLower(o.name).find(flt) == std::string::npos) continue;
         rows.push_back(i);
+        if (o.alloc_bucket == kAllocHeap) any_heap = true;
         // Placed resources alias into a heap and Reserved are virtual, so they
         // don't add to actual allocated memory.
         if (AllocCountsAsMemory(o.alloc_bucket)) total_size += o.size;
@@ -1603,11 +1689,11 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
         ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
         ImGuiTableFlags_Sortable | ImGuiTableFlags_ScrollY | ImGuiTableFlags_SortTristate;
 
-    enum Col { C_Id, C_Type, C_Alloc, C_Heap, C_Dim, C_Format, C_Size, C_Prio,
-               C_Loc, C_Age, C_Name };
+    enum Col { C_Id, C_Type, C_Alloc, C_Heap, C_Dim, C_Format, C_Size, C_HeapUse,
+               C_Prio, C_Loc, C_Age, C_Name };
 
     // The location column only exists with ETW data (see DrawAllocRow).
-    if (!ImGui::BeginTable(id, etw ? 11 : 10, tflags)) return;
+    if (!ImGui::BeginTable(id, etw ? 12 : 11, tflags)) return;
     ImGui::TableSetupScrollFreeze(0, 1);
     ImGui::TableSetupColumn("id",     ImGuiTableColumnFlags_WidthFixed |
                                       ImGuiTableColumnFlags_DefaultSort, 0, C_Id);
@@ -1617,6 +1703,7 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
     ImGui::TableSetupColumn("dim",    ImGuiTableColumnFlags_WidthFixed, 0, C_Dim);
     ImGui::TableSetupColumn("format", ImGuiTableColumnFlags_WidthFixed, 0, C_Format);
     ImGui::TableSetupColumn("size",   ImGuiTableColumnFlags_WidthFixed, 0, C_Size);
+    ImGui::TableSetupColumn("heap use", ImGuiTableColumnFlags_WidthFixed, 0, C_HeapUse);
     ImGui::TableSetupColumn("priority", ImGuiTableColumnFlags_WidthFixed, 0, C_Prio);
     if (etw)
         ImGui::TableSetupColumn("location", ImGuiTableColumnFlags_WidthFixed, 0, C_Loc);
@@ -1624,16 +1711,36 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
     ImGui::TableSetupColumn("name",   ImGuiTableColumnFlags_WidthStretch, 0, C_Name);
     ImGui::TableHeadersRow();
 
+    // Heap use at ref_t. A placed resource occupies its heap whether or not
+    // this table's filters show it, so this looks at all objects.
+    if (any_heap) trace_.HeapUsageAt(ref_t, heap_usage_);
+    else          heap_usage_.clear();
+
     // Build a sort comparator (by object index) from the table's sort specs.
     std::function<bool(size_t, size_t)> less;
     if (ImGuiTableSortSpecs* ss = ImGui::TableGetSortSpecs();
         ss && ss->SpecsCount > 0) {
         const int  col = ss->Specs[0].ColumnUserID;
         const bool asc = ss->Specs[0].SortDirection == ImGuiSortDirection_Ascending;
-        less = [this, col, asc, ref_t](size_t a, size_t b) {
+        // Heap-use sort key: rank (0 = known fraction, 1 = unknown "?",
+        // 2 = heap not live "-", 3 = not a heap) and the fraction. Ranks
+        // 1-3 sort after the known values in either direction.
+        auto use_key = [this, ref_t](const Obj& o) -> std::pair<int, double> {
+            if (o.alloc_bucket != kAllocHeap) return {3, 0.0};
+            if (!o.LiveAt(ref_t))             return {2, 0.0};
+            auto it = heap_usage_.find(o.id);
+            if (it == heap_usage_.end())      return {0, 0.0};
+            if (!it->second.known())          return {1, 0.0};
+            return {0, it->second.fraction()};
+        };
+        less = [this, col, asc, ref_t, use_key](size_t a, size_t b) {
             const auto& os = trace_.objects();
             const Obj& x = os[a];
             const Obj& y = os[b];
+            if (col == C_HeapUse) {
+                const auto kx = use_key(x), ky = use_key(y);
+                if (kx.first != ky.first) return kx.first < ky.first;
+            }
             int c = 0;
             switch (col) {
                 case C_Id:     c = (x.id < y.id) ? -1 : (x.id > y.id); break;
@@ -1643,6 +1750,11 @@ void App::DrawAllocTable(const char* id, const char* noun, uint64_t ref_t,
                 case C_Dim:    c = x.dim.compare(y.dim); break;
                 case C_Format: c = (int)x.format - (int)y.format; break;
                 case C_Size:   c = (x.size < y.size) ? -1 : (x.size > y.size); break;
+                case C_HeapUse: {
+                    const double fx = use_key(x).second, fy = use_key(y).second;
+                    c = (fx < fy) ? -1 : (fx > fy);
+                    break;
+                }
                 case C_Prio:   c = x.prio_bucket - y.prio_bucket; break;
                 case C_Loc:    c = LocSortKey(x.LocationAt(ref_t)) -
                                    LocSortKey(y.LocationAt(ref_t)); break;
@@ -1783,6 +1895,7 @@ bool App::SaveAllocations(const std::string& path, const std::vector<size_t>& ro
         j["size"]           = o.size;
         j["parent_heap_id"] = o.parent_heap_id;
         if (o.parent_heap_ptr) j["parent_heap_ptr"] = hex(o.parent_heap_ptr);
+        if (o.has_heap_offset) j["heap_offset"] = o.heap_offset;
         j["name"]           = o.name; // current (post-rename) name
         j["category"]       = category(idx);
         // ETW-reported location at the snapshot time (VRAM/Sys/Unknown/n/a).

@@ -147,6 +147,8 @@ struct Obj {
     uint64_t    size           = 0;
     uint64_t    parent_heap_id = 0;
     uint64_t    parent_heap_ptr = 0;        // raw IUnknown* of the parent heap (Placed)
+    uint64_t    heap_offset    = 0;          // byte offset in the parent heap (Placed, protocol 5+)
+    bool        has_heap_offset = false;     // heap_offset was logged (absent before protocol 5)
     uint64_t    created_ns     = 0;
     uint64_t    destroyed_ns   = UINT64_MAX; // UINT64_MAX while still live
     int         heap_bucket    = 0;
@@ -226,6 +228,31 @@ struct EtwHello {
     std::string main_log;
 };
 
+// A byte range [begin, end).
+struct ByteRange {
+    uint64_t begin = 0;
+    uint64_t end   = 0;
+};
+
+// Total length of the union of `ranges`, so overlapping ranges count once.
+// Sorts `ranges` in place; empty ranges (end <= begin) contribute nothing.
+uint64_t UnionLength(std::vector<ByteRange>& ranges);
+
+// How much of a heap is covered by the placed resources live at some instant.
+// Each placed resource occupies [heap_offset, heap_offset + size), clamped to
+// the heap; aliasing (overlapping) resources are counted once in `used`.
+struct HeapUsage {
+    uint64_t heap_size = 0;
+    uint64_t used      = 0; // union of the placed ranges
+    uint64_t sum       = 0; // plain sum of the (clamped) placed ranges
+    uint32_t placed    = 0; // live placed resources in the heap
+    uint32_t no_offset = 0; // ...of which have no heap_offset (protocol < 5)
+
+    bool   known()    const { return no_offset == 0; }
+    bool   overlaps() const { return sum > used; } // some placed resources alias
+    double fraction() const { return heap_size ? (double)used / (double)heap_size : 0.0; }
+};
+
 // Aggregated state at a chosen instant, for the summary view.
 struct MemorySummary {
     uint64_t bytes [kHeapBuckets][kAllocBuckets] = {};
@@ -252,7 +279,8 @@ public:
 
     // --- header info (from hello / goodbye) ---
     // protocol: 1 = no callstacks, 2 = modules + stacks, 3 = residency priority
-    // + parent_heap_ptr, 4 = created.ptr + hello.qpc_start (the ETW join keys).
+    // + parent_heap_ptr, 4 = created.ptr + hello.qpc_start (the ETW join keys),
+    // 5 = created.heap_offset (placed resources).
     uint32_t    pid          = 0;
     uint32_t    protocol     = 0;
     std::string exe;
@@ -282,6 +310,13 @@ public:
 
     // State of the world at instant t (single pass over all objects).
     MemorySummary SummaryAt(uint64_t t) const;
+
+    // Placed-resource coverage of the heaps at instant t (single pass over all
+    // objects): heap id -> usage, for every heap with at least one placed
+    // resource live at t. Heaps with none are absent (their usage is 0).
+    void HeapUsageAt(uint64_t t, std::unordered_map<uint64_t, HeapUsage>& out) const;
+    // Usage of one heap at instant t.
+    HeapUsage HeapUsageOf(const Obj& heap, uint64_t t) const;
 
     // --- ETW sidecar ---
     // True once a sidecar file was found for this log (and its etw_hello, if

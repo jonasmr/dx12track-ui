@@ -8,6 +8,7 @@
 #include <functional>
 #include <map>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "Trace.h"
@@ -139,6 +140,11 @@ private:
     std::map<std::string, bool> type_show_, alloc_show_, heap_show_, dim_show_, prio_show_;
     // Location filter (LocBucketName values); only shown/applied with ETW data.
     std::map<std::string, bool> loc_show_;
+
+    // Placed-resource coverage per heap id at the reference time of the table
+    // being drawn; recomputed by each DrawAllocTable call (read by its rows and
+    // its sort comparator), kept as a member to reuse the allocation.
+    std::unordered_map<uint64_t, HeapUsage> heap_usage_;
 
     // Scratch buffers reused across frames for ImPlot (avoids per-frame alloc).
     std::vector<double> xs_, ys_, lo_, hi_;

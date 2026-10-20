@@ -344,6 +344,10 @@ void Trace::IngestLine(std::string_view line) {
         o.size           = j.value("size", (uint64_t)0);
         o.parent_heap_id = j.value("parent_heap_id", (uint64_t)0);
         o.parent_heap_ptr = ParseHex(j.value("parent_heap_ptr", std::string()));
+        if (auto it = j.find("heap_offset"); it != j.end() && it->is_number_unsigned()) {
+            o.heap_offset     = it->get<uint64_t>(); // protocol 5+, Placed only
+            o.has_heap_offset = true;
+        }
         o.created_ns     = ts;
         o.heap_bucket    = HeapBucket(o.heap);
         o.alloc_bucket   = AllocBucket(o.alloc);
@@ -489,6 +493,67 @@ MemorySummary Trace::SummaryAt(uint64_t t) const {
         }
     }
     return m;
+}
+
+uint64_t UnionLength(std::vector<ByteRange>& ranges) {
+    std::sort(ranges.begin(), ranges.end(),
+              [](const ByteRange& a, const ByteRange& b) { return a.begin < b.begin; });
+    uint64_t total = 0;
+    uint64_t cur_begin = 0, cur_end = 0; // current merged run; empty when equal
+    for (const ByteRange& r : ranges) {
+        if (r.end <= r.begin) continue;
+        if (r.begin > cur_end) {          // disjoint: close the current run
+            total += cur_end - cur_begin;
+            cur_begin = r.begin;
+            cur_end   = r.end;
+        } else if (r.end > cur_end) {     // overlapping or adjacent: extend it
+            cur_end = r.end;
+        }
+    }
+    return total + (cur_end - cur_begin);
+}
+
+namespace {
+// Clamp a placed resource's [offset, offset + size) to a heap of `heap_size`.
+ByteRange PlacedRange(const Obj& o, uint64_t heap_size) {
+    const uint64_t end = o.size > UINT64_MAX - o.heap_offset ? UINT64_MAX
+                                                             : o.heap_offset + o.size;
+    return { std::min(o.heap_offset, heap_size), std::min(end, heap_size) };
+}
+} // namespace
+
+void Trace::HeapUsageAt(uint64_t t, std::unordered_map<uint64_t, HeapUsage>& out) const {
+    out.clear();
+    std::unordered_map<uint64_t, std::vector<ByteRange>> ranges; // heap id -> ranges
+    for (const Obj& o : objects_) {
+        if (o.alloc_bucket != kAllocPlaced || !o.parent_heap_id || !o.LiveAt(t)) continue;
+        HeapUsage& u = out[o.parent_heap_id];
+        if (u.placed++ == 0) {
+            const Obj* heap = ObjectById(o.parent_heap_id);
+            u.heap_size = heap ? heap->size : 0;
+        }
+        if (!o.has_heap_offset) { ++u.no_offset; continue; }
+        const ByteRange r = PlacedRange(o, u.heap_size);
+        u.sum += r.end - r.begin;
+        ranges[o.parent_heap_id].push_back(r);
+    }
+    for (auto& [heap_id, rs] : ranges) out[heap_id].used = UnionLength(rs);
+}
+
+HeapUsage Trace::HeapUsageOf(const Obj& heap, uint64_t t) const {
+    HeapUsage u;
+    u.heap_size = heap.size;
+    std::vector<ByteRange> ranges;
+    for (const Obj& o : objects_) {
+        if (o.alloc_bucket != kAllocPlaced || o.parent_heap_id != heap.id ||
+            !o.LiveAt(t)) continue;
+        ++u.placed;
+        if (!o.has_heap_offset) { ++u.no_offset; continue; }
+        ranges.push_back(PlacedRange(o, u.heap_size));
+        u.sum += ranges.back().end - ranges.back().begin;
+    }
+    u.used = UnionLength(ranges);
+    return u;
 }
 
 EtwObjInfo& Trace::EtwInfoFor(uint64_t id) {

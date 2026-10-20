@@ -48,12 +48,12 @@ Four docked panels: **Memory over time** (top-left), **Active allocations** (bot
 
 ## Data format (from `dx12track/src/common/EventTypes.h`)
 
-One JSON object per line. `hello.protocol` is `1` (no callstacks), `2` (modules + stacks), `3` (residency priority) or `4` (ETW join keys). `dx12track/FORMAT.md` is the full spec; every version is additive for JSONL readers, so nothing is rejected by protocol number.
+One JSON object per line. `hello.protocol` is `1` (no callstacks), `2` (modules + stacks), `3` (residency priority), `4` (ETW join keys) or `5` (placed-resource heap offsets). `dx12track/FORMAT.md` is the full spec; every version is additive for JSONL readers, so nothing is rejected by protocol number.
 
 - `hello` — `pid`, `protocol`, `qpc_freq`, `exe`, `qpc_start` *(proto 4: QPC at `ts_ns` 0)*
 - `module_loaded` *(proto 2)* — `base`(hex str), `size`, `timestamp`, `pdb_age`, `pdb_guid`, `name`, `pdb_name`
 - `module_unloaded` *(proto 2)* — `base`
-- `created` — `id`, `ptr` *(proto 4: app-visible interface pointer, hex str)*, `type`, `alloc`, `heap`, `dim`, `format`, `size`, `parent_heap_id`, `parent_heap_ptr` *(proto 3, Placed only)*, `name`, `stack`(hex-string array, **optional**)
+- `created` — `id`, `ptr` *(proto 4: app-visible interface pointer, hex str)*, `type`, `alloc`, `heap`, `dim`, `format`, `size`, `parent_heap_id`, `parent_heap_ptr` *(proto 3, Placed only)*, `heap_offset` *(proto 5, Placed only: byte offset in the parent heap; `[heap_offset, heap_offset + size)` is the occupied range)*, `name`, `stack`(hex-string array, **optional**)
 - `residency_priority` *(proto 3)* — `id`, `object_ptr`, `priority`, `priority_name`
 - `renamed` — `id`, `name`
 - `destroyed` — `id`
@@ -89,6 +89,7 @@ The UI parses the string fields directly — it needs **no** DirectX headers.
   - UI: `location` column (value at the tab's ref time; tooltip shows via, history, paging, driver size) + `Location` filter (also applies to Save...); VRAM/Sys/Unknown/n/a breakdown in the Memory summary; **By location** timeline mode (stacked, counted memory only, splittable); two timeline overlays, each with a toolbar checkbox (default on): the `local_usage` / `local_budget` counters in every mode (budget is left off-scale if it's far above the data), and VRAM/Sys/Unknown location lines in every mode except By location; neither is drawn in the host-visible split panel; sidecar path, ETW stats and an events/buffers-lost warning in the dx12track panel.
   - The by-location series (`Trace::LocationSeries()`) is built separately from `samples_` by a time-sorted sweep over create/destroy + location changes, because location lines arrive out of order. It is cached on `Trace::data_version()` and only rebuilt when either file changed and the mode is shown.
   - Save... writes `qpc_start` / `ptr` (v4) and, with ETW data, a `"location"` (value at the snapshot time) next to `"category"`.
+- **Heap use** (proto 5): the allocations table's `heap use` column shows, for Heap objects, the share of the heap covered by the **union** of `[heap_offset, heap_offset + size)` of its placed resources live at the tab's ref time (clamped to the heap, so aliased resources count once). Computed once per table draw over *all* objects (`Trace::HeapUsageAt`), independent of the table filters. `?` = some contributing placed resource has no `heap_offset` (log older than proto 5); `-` = the heap isn't live at the ref time; blank for non-heaps. Tooltip: used/heap bytes, placed count, overlap. Sorts by fraction with `?`/`-`/blank last. The Placed Resource Info panel shows a placed resource's offset/range and the heap's use; Save... writes `heap_offset`.
 
 ---
 
